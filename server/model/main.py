@@ -1,6 +1,8 @@
 import streamlit as st
 from summary import Summarizer
 from evaluate import Evaluate
+import nltk
+nltk.download('punkt')
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)

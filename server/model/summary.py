@@ -1,5 +1,8 @@
 import networkx as nx
 import numpy as np
+import sys
+
+sys.path.append('/server/model/')
 from nltk import sent_tokenize
 from model.preprocess import Preprocessor
 from sklearn.cluster import KMeans
