@@ -12,16 +12,10 @@ const NavBar = ({isLogin = true}) => {
             <div className="text-[#66AA4C] text-2xl font-light font-serif">Vietnamese</div>
             <div className="text-[#479455] text-2xl font-bold">TextSummarizer</div>
           </div>
-          <div>
-            <div className="text-black text-[20px] font-bold">Summarizer</div>
-          </div>
           <div className="flex flex-wrap content-center items-center">
-            <button className="bg-[#178733] px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]">
+            <button className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]">
               <FontAwesomeIcon icon={faGem} className='text-white '  />
               <div className='text-white font-medium pl-2'>Upgrade to Premium</div>
-            </button>
-            <button className='px-2 '>
-              <FontAwesomeIcon icon={faEarthAmericas} className='text-3xl '/>
             </button>
             
             {isLogin === true && (<AccountButton />)}
