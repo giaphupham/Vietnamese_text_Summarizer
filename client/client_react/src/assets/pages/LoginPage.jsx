@@ -22,20 +22,19 @@ function LoginPage() {
     e.preventDefault();
 
 
-    const response = await axios.post('http://127.0.0.1:5000/login', {
+    await axios.post('http://127.0.0.1:5000/login', {
       "username": username,
       "password": password,
+    })
+    .then(response => {
+      console.log('then' + response)
+      navigate({ pathname: '/' })
+    })
+    .catch(error => {
+      console.log('catch ' + error.response)
+      alert('Invalid username or password')
     });
-      // Handle successful login, e.g., redirect to home page
-      console.log(response);
 
-    try {
-      if (response.status == 200){
-        navigate({ pathname: '/' })
-      } 
-    } catch (e) {
-      alert("đm")
-    }
   };
 
   

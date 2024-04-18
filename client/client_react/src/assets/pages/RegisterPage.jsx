@@ -10,6 +10,7 @@ function RegisterPage() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
 
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value)
@@ -17,27 +18,32 @@ function RegisterPage() {
   const passwordChangeHandler = (event) => {
     setPassword(event.target.value)
   }
+  const nameChangeHandler = (event) => {
+    setName(event.target.value)
+  }
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-
-    const response = await axios.post('http://127.0.0.1:5000/register', {
+    await axios.post('http://127.0.0.1:5000/register', {
       'username': username,
       'password': password,
-
+      'name': name,
+    })
+    .then(response => { 
+      console.log('then' + response)
+      navigate({ pathname: '/Login' })
+    })
+    .catch(error => {
+        console.log('catch ' + error)
+        alert('Account already exists')
     });
-
-      // Handle successful login, e.g., redirect to home page
-      console.log(response);
-      if (response.status==200){
-        navigate({ pathname: '/' })
-      }
   };
+
 
   return (
     <div>
-        <NavBar />
+        <NavBar isLogin={false}/>
 
         <div className="grid grid-cols-1 justify-items-center pt-10">
           <b className="text-xl font-medium">Sign up for your VietnameseTextSummarizer account</b>
@@ -73,6 +79,7 @@ function RegisterPage() {
             placeholder="Name"
             containerTheme="pt-4"
             type="text"
+            onChange={nameChangeHandler}
             ></Input>
             <div>
 

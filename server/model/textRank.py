@@ -1,5 +1,5 @@
-from model.summary import Summarizer
-from model.evaluate import Evaluate
+from summary import Summarizer
+from evaluate import Evaluate
 
 
 def load_model():

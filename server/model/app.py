@@ -4,8 +4,7 @@ from flask_bcrypt import Bcrypt
 from datetime import timedelta
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from model.textRank import load_model
-from model.abstract_model import summarizer
+from abstract_model import summarizer
 from supabase import create_client, Client
 from email.message import EmailMessage
 import ssl
@@ -15,6 +14,14 @@ import base64
 import os
 
 import anthropic
+from summary import Summarizer
+from evaluate import Evaluate
+
+
+def load_model():
+    s = Summarizer()
+    e = Evaluate()
+    return s, e
 
 app = Flask(__name__)
 
@@ -60,12 +67,12 @@ def summerize_long():
     
     data = request.json
     input_text = data.get('input-text')
-
+    print(input_text)
     try:
         summarizer, evaluate = load_model()
 
         output_text = summarizer.summarize(input_text, mode="lsa")
-        score = evaluate.content_based(output_text, input_text)
+        score = evaluate.content_based(output_text[0], input_text)
 
         return jsonify({
             'message': 'Input text received successfully',
@@ -178,7 +185,7 @@ def login():
                     session.permanent = True
                     session['user'] = username
                     print("session " + session['user'])
-                    return redirect('/home'), 200       
+                    return redirect(url_for('home')), 200
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
                 

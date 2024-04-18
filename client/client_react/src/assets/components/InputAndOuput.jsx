@@ -47,7 +47,7 @@ const InputAndOutput = ({summarizeType}) => {
         const response = await axios.post(apiUrl, {
           'input-text': inputText
         });
-
+        
         const data = response.data;
         setOutputText(data['output-text']);
 
