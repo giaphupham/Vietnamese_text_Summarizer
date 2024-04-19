@@ -156,12 +156,11 @@ def register():
 
     if username and password:
         try:
-            data, count = supabase.table('user').insert({"email": username, "password": hashed_password, "name": name}).execute()
+            supabase.table('user').insert({"email": username, "password": hashed_password, "name": name}).execute()
             return jsonify({'message': 'User created successfully'}), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-
-    
+  
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     
@@ -264,6 +263,34 @@ def verify_email():
     except Exception as e:
         return jsonify({'error': 'Wrong OTP'}), 500
 
+@app.route('/save-text', methods=['POST'])
+def save_text():
+    try:
+        data = request.json
+        input = data.get('input')
+        output = data.get('output')
+        mode = data.get('mode')
+        user_id = data.get('user_id')
+
+        supabase.table('text').insert({"userId": user_id, "input": input, "output": output, "mode": mode}).execute()
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    return jsonify({'message':"Saved successfully"}), 200
+    
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    try:
+        data = request.json
+        text_id = data.get('text_id')
+        star = data.get('star')
+        comment = data.get('comment')
+
+        supabase.table('feedback').insert({"textId": text_id, "star": star, "comment": comment}).execute()
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    return jsonify({'message':"Saved feedback successfully"}), 200
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
