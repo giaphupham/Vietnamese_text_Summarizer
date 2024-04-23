@@ -15,7 +15,9 @@ const AccountButton = () => {
   const handleLogout = () => {
     // Perform logout logic here
     // You can use axios to call your logout endpoint
-    axios.get('http://127.0.0.1:5000//logout') // Ensure that cookies are sent along with the request
+    axios.get('http://127.0.0.1:5000//logout',{
+      withCredentials: true
+    }) // Ensure that cookies are sent along with the request
       .then(response => {
         if (response.status === 200) {
           // Redirect to login page after successful logout
