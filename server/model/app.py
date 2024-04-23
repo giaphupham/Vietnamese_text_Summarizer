@@ -46,16 +46,19 @@ key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2
 supabase: Client = create_client(url, key)
 
 
-
-app.secret_key = 'supersecret'
-app.permanent_session_lifetime = timedelta(minutes=30)
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_PERMANENT"] = True
+app.config["SESSION_TYPE"] = "filesystem"
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=5)
+Session(app)
 
 client = anthropic.Anthropic(
     # defaults to os.environ.get("ANTHROPIC_API_KEY")
     api_key="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",
 )
 
-CORS(app)
+CORS(app, supports_credentials=True)
 bcrypt = Bcrypt(app)
 
 MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -184,7 +187,7 @@ def login():
                     session.permanent = True
                     session['user'] = username
                     print("session " + session['user'])
-                    return redirect(url_for('home')), 200
+                    return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
                 

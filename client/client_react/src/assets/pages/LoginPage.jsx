@@ -2,6 +2,7 @@ import React from "react";
 import Form from "../components/Form";
 import Input from "../components/Input";
 import NavBar from "../components/NavBar";
+import HttpClient from "../components/HttpClient";
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import axios from 'axios'
@@ -22,16 +23,17 @@ function LoginPage() {
     e.preventDefault();
 
 
-    await axios.post('http://127.0.0.1:5000/login', {
+    await HttpClient.post('http://127.0.0.1:5000/login', {
       "username": username,
       "password": password,
+      withCredentials: true,
     })
     .then(response => {
-      console.log('then' + response)
+      console.log('then' + response.data)
       navigate({ pathname: '/' })
     })
     .catch(error => {
-      console.log('catch ' + error.response)
+      console.log('catch ' + error)
       alert('Invalid username or password')
     });
 
