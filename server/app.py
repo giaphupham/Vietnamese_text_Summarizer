@@ -197,7 +197,7 @@ def login():
     else:
         if "user" in session:
             return redirect(url_for('home'))
-        return jsonify({'message': 'You are at the login page'}), 401
+        return jsonify({'message': 'You are at the login page'}), 200
     
 
 @app.route('/logout')
