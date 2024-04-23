@@ -1,8 +1,10 @@
 import React, {useState} from "react";
 import NavBar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 function ConfirmEmailPage() {
+    const navigate = useNavigate();
     const [inputCode, setInputCode] = useState('');
     const [error, setError] = useState('');
 
@@ -10,12 +12,25 @@ function ConfirmEmailPage() {
         setInputCode(e.target.value);
     };
 
-    const handleSubmit = (e) => {
+    const handleVerify = async (e) => {
         e.preventDefault();
-        if (inputCode === code) {
-        onConfirm();
-        } else {
-        setError('Invalid code. Please try again.');
+        console.log('email: ' + localStorage.getItem('email'))
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/verify_otp', {
+                'email': localStorage.getItem('email'),
+                'otp': inputCode,
+                
+            });
+
+            if (response.status === 200) {
+                console.log('Email verified successfully!');
+                navigate('/login');
+            } else {
+                alert('Error: ' + response.data.error);
+            }
+        } catch (error) {
+            console.log(error);
+            alert('Something went wrong');
         }
     };
     
@@ -31,7 +46,7 @@ function ConfirmEmailPage() {
                 <div className="bg-white p-8 rounded-lg shadow-md">
                     <h1 className="text-2xl font-semibold mb-4">Confirm Email</h1>
                     <p className="mb-4">A confirmation code has been sent to your email. Please check your email.</p>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleVerify}>
                     <input
                         type="text"
                         className="w-full px-4 py-2 border rounded-md mb-4"
