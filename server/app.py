@@ -4,7 +4,7 @@ from flask_bcrypt import Bcrypt
 from datetime import timedelta
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from abstract_model import summarizer
+from model.abstract_model import summarizer
 from supabase import create_client, Client
 from email.message import EmailMessage
 import ssl
@@ -14,8 +14,8 @@ import base64
 import os
 
 import anthropic
-from summary import Summarizer
-from evaluate import Evaluate
+from model.summary import Summarizer
+from model.evaluate import Evaluate
 
 
 def load_model():
