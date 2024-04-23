@@ -4,11 +4,11 @@ import sys
 
 sys.path.append('/server/model/')
 from nltk import sent_tokenize
-from preprocess import Preprocessor
+from model.preprocess import Preprocessor
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin_min
 from sklearn.metrics.pairwise import cosine_similarity
-from vectorize import Vectorizer
+from model.vectorize import Vectorizer
 from pathlib import Path
 
 class Summarizer():
