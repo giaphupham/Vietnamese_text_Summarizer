@@ -195,13 +195,15 @@ def login():
             return jsonify({'Error while accessing database': str(e)}), 500
     
     else:
-        return redirect(url_for('home'))
+        if "user" in session:
+            return redirect(url_for('home'))
+        return jsonify({'message': 'You are at the login page'}), 401
     
 
 @app.route('/logout')
 def log_out():
-    #session.pop('user', None)
-    return redirect(url_for('login')), 200
+    session.pop('user', None)
+    return redirect(url_for('login'))
 
 @app.route('/resetpassword', methods=['POST'])
 def reset_password():
