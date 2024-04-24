@@ -69,9 +69,17 @@ def summerize_long():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
+    username = data.get('username')
     input_text = data.get('input-text')
-    print(input_text)
+    words_amount = len(input_text.split())
     try:
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+        # print("sub status: ",dtb_result, type(dtb_result))
+                
+        subscription = dtb_result.data[0]["subscription"]
+        if(words_amount > 1500 and subscription==0):
+            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+        
         summarizer, evaluate = load_model()
 
         output_text = summarizer.summarize(input_text, mode="lsa")
@@ -91,9 +99,18 @@ def summerize_short():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
+    username = data.get('username')
     input_text = data.get('input-text')
+    words_amount = len(input_text.split())
 
     try:
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+                
+        subscription = dtb_result.data[0]["subscription"]
+
+        if(words_amount > 1500 and subscription==0):
+            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+
         output_text = summarizer(input_text)
         return jsonify({
             'message': 'Input text received successfully',
@@ -108,22 +125,30 @@ def summerize_claude():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
+    username = data.get("username")
     input_text = data.get('input-text')
     percent = data.get('percent')
-
-
     input_length= len(input_text.split())
     output_length = int(input_length * percent / 100)
 
-    message = client.messages.create(
-        model="claude-3-haiku-20240307",
-        max_tokens=1024,
-        messages=[
-            {"role": "user", "content": "Tóm tắt văn bản sau còn khoảng "+str(output_length)+" từ: "+input_text}
-        ]
-    )
+    
     # handle the response
     try:
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+                
+        subscription = dtb_result.data[0]["subscription"]
+
+        if(subscription != 2):
+            return jsonify({'error': 'Only level 2 subscription user can summarize using this tool'}), 403
+        
+
+        message = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=1024,
+            messages=[
+                {"role": "user", "content": "Tóm tắt văn bản sau còn khoảng "+str(output_length)+" từ: "+input_text}
+            ]
+        )
         summarizer, evaluate = load_model()
         output_text = message.content[0].text.split(":\n")[1]
         score = evaluate.content_based(output_text, input_text)
