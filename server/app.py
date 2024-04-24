@@ -69,9 +69,11 @@ def summerize_long():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
-    username = data.get('username')
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
+
+    username = session.get('user')
+    
     try:
         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
         # print("sub status: ",dtb_result, type(dtb_result))
@@ -99,9 +101,10 @@ def summerize_short():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
-    username = data.get('username')
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
+
+    username = session.get('user')
 
     try:
         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
@@ -125,12 +128,12 @@ def summerize_claude():
         return jsonify({'error': 'No JSON data received'}), 400
     
     data = request.json
-    username = data.get("username")
     input_text = data.get('input-text')
     percent = data.get('percent')
     input_length= len(input_text.split())
     output_length = int(input_length * percent / 100)
 
+    username = session.get('user')
     
     # handle the response
     try:
