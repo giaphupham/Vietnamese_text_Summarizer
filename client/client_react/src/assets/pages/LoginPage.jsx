@@ -31,6 +31,7 @@ function LoginPage() {
     })
     .then(response => {
       console.log('then' + response.data)
+      localStorage.setItem('email', username);
       navigate({ pathname: '/' })
     })
     .catch(error => {

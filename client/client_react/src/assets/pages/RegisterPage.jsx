@@ -9,6 +9,7 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (data) => {
+    localStorage.setItem('email', data.username);
     setLoading(true);
     await axios.post('http://127.0.0.1:5000/register', {
       'username': data.username,
