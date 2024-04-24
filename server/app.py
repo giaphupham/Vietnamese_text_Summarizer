@@ -100,6 +100,7 @@ def summerize_short():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
     
+    print(session.get('user'))
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
@@ -380,6 +381,6 @@ def upgrade_plan():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=True)
+    app.run(debug=False)
 
     # test commit

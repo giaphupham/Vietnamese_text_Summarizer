@@ -6,6 +6,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
 import Notification from './NotiWindow';
 import { IoMdCloudDownload } from "react-icons/io";
+import HttpClient from './HttpClient';
 
 const InputAndOutput = ({summarizeType}) => {
   const [inputText, setInputText] = useState('');
@@ -42,20 +43,20 @@ const InputAndOutput = ({summarizeType}) => {
   const handleSummarize = async () => {
       const apiUrl = summarizeType === 'short' ? 'http://127.0.0.1:5000/summarize-short' : 'http://127.0.0.1:5000/summarize-long';
 
-      try{
-        setLoading(true);
-        const response = await axios.post(apiUrl, {
-          'input-text': inputText
-        });
-        
+      setLoading(true);
+      await HttpClient.post(apiUrl, {
+        'input-text': inputText,
+        withCredentials: true,
+      })
+      .then(response => {
         const data = response.data;
         setOutputText(data['output-text']);
-
-      } catch (error) {
-        console.error(error);
-      } finally {
+      })
+      .catch(error => {
+        console.log('catch ' + error)
+        alert(error)
         setLoading(false);
-      }
+      });
 
   };
 
