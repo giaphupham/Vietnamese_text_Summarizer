@@ -5,12 +5,12 @@ import NavBar from "../components/NavBar";
 import HttpClient from "../components/HttpClient";
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import axios from 'axios'
 
 function LoginPage() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false);
 
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value)
@@ -22,7 +22,7 @@ function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-
+    setLoading(true);
     await HttpClient.post('http://127.0.0.1:5000/login', {
       "username": username,
       "password": password,
@@ -35,6 +35,7 @@ function LoginPage() {
     .catch(error => {
       console.log('catch ' + error)
       alert('Invalid username or password')
+      setLoading(false);
     });
 
   };
@@ -82,8 +83,16 @@ function LoginPage() {
                 <button
                     type="submit"
                     className="p-2 bg-[#178733] rounded-full w-full mt-10 mb-4"
+                    disabled={loading}
                 >
-                    <b className="text-xl leading-none text-white">LOG IN</b>
+            {loading ? (
+              <div
+              className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status">
+              </div>
+              ) : (
+                <b className="text-xl leading-none text-white">LOG IN</b>
+            )}      
                 </button >
                 <b className="text-sky-500 font-medium cursor-pointer" onClick={() => navigate({ pathname: '/Register' })}>Don't have account?</b>
             </div>

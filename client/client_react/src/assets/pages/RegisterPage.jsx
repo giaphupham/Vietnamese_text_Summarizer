@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import NavBar from "../components/NavBar";
 import RegisterForm from "../components/RegisterForm";
 import { useNavigate } from "react-router-dom";
@@ -6,9 +6,10 @@ import axios from 'axios'
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (data) => {
-    localStorage.setItem('email', data.username);
+    setLoading(true);
     await axios.post('http://127.0.0.1:5000/register', {
       'username': data.username,
       'password': data.password,
@@ -22,7 +23,8 @@ function RegisterPage() {
     })
     .catch(error => {
         console.log('catch ' + error)
-        alert('Account already exists')
+        alert(error)
+        setLoading(false);
     });
   };
 
@@ -40,7 +42,7 @@ function RegisterPage() {
   return (
     <div>
         <NavBar isLogin={false}/>
-        <RegisterForm onSubmit={handleRegister} />
+        <RegisterForm onSubmit={handleRegister} load={loading} />
     </div>
 
 

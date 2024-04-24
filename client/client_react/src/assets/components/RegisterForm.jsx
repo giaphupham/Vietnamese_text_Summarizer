@@ -4,7 +4,7 @@ import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react'
 
-function RegisterForm({onSubmit}) {
+function RegisterForm({onSubmit, load}) {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -47,6 +47,7 @@ function RegisterForm({onSubmit}) {
             id="username"
             inputTheme="h-12"
             placeholder="Email"
+            type="email"
             onChange={usernameChangeHandler}
             />
             <Input
@@ -73,7 +74,14 @@ function RegisterForm({onSubmit}) {
                     type="submit"
                     className="p-2 bg-[#178733] rounded-full w-full mt-10 mb-4"
                 >
-                    <b className="text-xl leading-none text-white">Continue</b>
+            {load ? (
+              <div
+              className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+              role="status">
+              </div>
+              ) : (
+                <b className="text-xl leading-none text-white">CONTINUE</b>
+            )} 
                 </button>
                 <b className="text-sky-500 font-medium cursor-pointer" onClick={() => navigate({ pathname: '/Login' })}>Already have an account?</b>
             </div>
