@@ -51,7 +51,7 @@ function RegisterPage() {
           .catch(error => {
               console.error(error);
               // Redirect to login page
-              navigate('/Login');
+              //navigate('/Login');
           });
     },[]);
 
