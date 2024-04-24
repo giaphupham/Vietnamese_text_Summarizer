@@ -47,6 +47,7 @@ const SubscriptionPage = () => {
       <div className="flex justify-between">
           <PlanWindow plan={{
             plans: getSubscriptionType(plans) === 'Free',
+            id:0,
             name: 'Free',
             price: '$0',
             pros: ['Unlimited access to all features', 'Free updates', '24/7 support'],
@@ -55,6 +56,7 @@ const SubscriptionPage = () => {
 
           <PlanWindow plan={{
             plans: getSubscriptionType(plans) === 'Pro',
+            id:1,
             name: 'Pro',
             price: '$20',
             pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features'],
@@ -63,6 +65,7 @@ const SubscriptionPage = () => {
 
           <PlanWindow plan={{
             plans: getSubscriptionType(plans) === 'Premium',
+            id:2,
             name: 'Premium',
             price: '$50',
             pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features', 'Unlimited users'],

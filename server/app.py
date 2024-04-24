@@ -340,6 +340,15 @@ def upload_file():
     
     return jsonify({"message": "File uploaded successfully"}), 200
 
+@app.route('/upgrade', methods=['POST'])
+def upgrade_plan():
+    data = request.json
+    plan = data.get('plan')
+    user = data.get('user')
+    supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
+
+    return jsonify({'message': 'Plan upgraded successfully'}), 200
+    
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
