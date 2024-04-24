@@ -283,6 +283,21 @@ def save_text():
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved successfully"}), 200
     
+@app.route('/profile', methods=['POST'])
+def profile():
+    try:
+        data = request.json
+        username = data.get('username')
+
+        dtb_result = supabase.table('user').select('name', 'subscription', 'created_at').eq('email', username).execute()
+        name = dtb_result.data[0]["name"]
+        subscription = dtb_result.data[0]["subscription"]
+        created_at = dtb_result.data[0]["created_at"]
+        
+        return jsonify({'name':name, 'subscription': subscription, 'created_at': created_at}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/feedback', methods=['POST'])
 def feedback():
     try:
