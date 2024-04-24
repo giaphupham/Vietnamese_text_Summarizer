@@ -3,6 +3,7 @@ import NavBar from '../components/NavBar';
 import { VscAccount } from "react-icons/vsc";
 import { MdCreditScore } from "react-icons/md";
 import axios from 'axios';
+import Footer from '../components/Footer';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
@@ -91,6 +92,7 @@ function UserProfile(){
         </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

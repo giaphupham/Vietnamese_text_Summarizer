@@ -1,5 +1,6 @@
 import React from "react";
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 function AdminPage() {
 
@@ -26,6 +27,7 @@ function AdminPage() {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

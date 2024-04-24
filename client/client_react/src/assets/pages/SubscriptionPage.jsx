@@ -1,4 +1,5 @@
 import React from 'react';
+import Footer from '../components/Footer';
 
 const SubscriptionPage = () => {
   return (
@@ -39,6 +40,7 @@ const SubscriptionPage = () => {
           <button className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">Upgrade</button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

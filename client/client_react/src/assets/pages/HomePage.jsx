@@ -4,6 +4,7 @@ import MainField from "../components/MainField";
 import axios from "axios";
 import { useEffect} from "react";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ function HomePage() {
     <div>
           <NavBar />
           <MainField />
+          <Footer />
     </div>
 
 
