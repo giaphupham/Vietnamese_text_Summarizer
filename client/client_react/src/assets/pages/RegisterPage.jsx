@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import NavBar from "../components/NavBar";
 import RegisterForm from "../components/RegisterForm";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +37,22 @@ function RegisterPage() {
         alert('Error sending OTP');
     }
 };
-
+    useEffect(() => {
+      axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+          .then(response => {
+              if (response.status === 200) {
+                  console.log(response.data.message);
+                  navigate({ pathname: '/' });
+              } else {
+                  throw new Error('You have to log in first');
+              }
+          })
+          .catch(error => {
+              console.error(error);
+              // Redirect to login page
+              navigate('/Login');
+          });
+    },[]);
 
   return (
     <div>
