@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { VscAccount } from "react-icons/vsc";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGem} from '@fortawesome/free-regular-svg-icons'
 
 
 const AccountButton = () => {
@@ -39,7 +41,14 @@ const AccountButton = () => {
 
 
   return (
-    
+    <div className="flex flex-wrap content-center items-center">
+      <button 
+        className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
+        onClick={() => navigate('/premium')}
+      >
+        <FontAwesomeIcon icon={faGem} className='text-white '  />
+        <div className='text-white font-medium pl-2'>Upgrade to Premium</div>
+      </button>
       <button
         onClick={toggleDropdown}
         type="button"
@@ -74,6 +83,7 @@ const AccountButton = () => {
         </div>
       )}
       </button>
+      </div>
 
       
   );
