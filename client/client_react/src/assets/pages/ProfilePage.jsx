@@ -6,7 +6,7 @@ import axios from 'axios';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
-  const [showProfile, setShowProfile] = useState(false);
+  const [showProfile, setShowProfile] = useState(true);
 
   const user = localStorage.getItem('email');
   console.log(user);
