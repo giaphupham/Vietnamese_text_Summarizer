@@ -1,7 +1,6 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGem} from '@fortawesome/free-regular-svg-icons'
-import { faEarthAmericas } from '@fortawesome/free-solid-svg-icons'
 import AccountButton from './AccountButton'
 import { useNavigate } from 'react-router-dom'
 
@@ -20,7 +19,10 @@ const NavBar = ({isLogin = true}) => {
             <div className="text-[#479455] text-2xl font-bold">TextSummarizer</div>
           </div>
           <div className="flex flex-wrap content-center items-center">
-            <button className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]">
+            <button 
+              className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
+              onClick={() => navigate('/premium')}
+            >
               <FontAwesomeIcon icon={faGem} className='text-white '  />
               <div className='text-white font-medium pl-2'>Upgrade to Premium</div>
             </button>
