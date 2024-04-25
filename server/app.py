@@ -71,6 +71,7 @@ def summerize_long():
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
+    output_sentences = round(data.get('sentences') / 2)
 
     username = session.get('user')
     
@@ -83,7 +84,7 @@ def summerize_long():
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
-        result = summarizer.summarize(input_text, mode="lsa")
+        result = summarizer.summarize(input_text, mode="lsa", keep_sentences= output_sentences)
         output_text = result[0]
         score = evaluate.content_based(output_text, input_text)
         

@@ -13,6 +13,8 @@ const InputAndOutput = ({summarizeType}) => {
   const [outputText, setOutputText] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sentences, setSentences] = useState(0);
+  const [words, setWords] = useState(0);
   const textAreaRef = useRef();
 
   const handleCopyClick = () => {
@@ -62,12 +64,15 @@ const InputAndOutput = ({summarizeType}) => {
       setLoading(true);
       await HttpClient.post(apiUrl, {
         'input-text': inputText,
+        'sentences': countSentences(),
         withCredentials: true,
       })
       .then(response => {
         setLoading(false);
         const data = response.data;
         setOutputText(data['output-text']);
+        setSentences(data['sentences']);
+        setWords(data['words']);
       })
       .catch(error => {
         console.log('catch ' + error)
@@ -152,7 +157,7 @@ const InputAndOutput = ({summarizeType}) => {
           <div
           className="text-black font-medium py-2 px-4 rounded m-2"
           >
-          sentences: 0 
+            {sentences} sentences | {words} words
           </div>
           <div className='mx-4 self-center flex items-center'>
           <button
