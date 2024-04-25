@@ -32,12 +32,28 @@ const InputAndOutput = ({summarizeType}) => {
     }
   };
 
+  const countSentences = () => {
+    // Split text into sentences based on period, exclamation mark, or question mark
+    const sentences = inputText.split(/[.!?]+/);
+    // Filter out empty strings (e.g., consecutive punctuation marks)
+    const filteredSentences = sentences.filter(sentence => sentence.trim() !== '');
+    return filteredSentences.length;
+  };
+
+  const countWords = () => {
+    const words = inputText.split(/\s+/); // split by spaces
+    return words.filter(word => word.trim() !== '').length; // filter out empty strings
+  };
   const handleNotificationClose = () => {
     setShowNotification(false);
   };
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
+  };
+
+  const isTextareaEmpty = () => {
+    return inputText.trim() === '';
   };
 
   const handleSummarize = async () => {
@@ -103,7 +119,10 @@ const InputAndOutput = ({summarizeType}) => {
           onChange={handleInputChange}
         />
         <div className='flex justify-between'>
-          <FileInput />
+          {isTextareaEmpty() ? (
+            <FileInput />
+          ) : (<p className='p-4'>{countWords()} words</p>
+          )}
           <button
           className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full m-2 w-40"
           onClick={handleSummarize}
