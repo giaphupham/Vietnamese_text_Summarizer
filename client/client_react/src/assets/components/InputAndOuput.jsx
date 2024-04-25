@@ -49,6 +49,7 @@ const InputAndOutput = ({summarizeType}) => {
         withCredentials: true,
       })
       .then(response => {
+        setLoading(false);
         const data = response.data;
         setOutputText(data['output-text']);
       })
