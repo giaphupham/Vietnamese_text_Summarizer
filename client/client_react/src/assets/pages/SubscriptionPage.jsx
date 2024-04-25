@@ -3,11 +3,29 @@ import Footer from '../components/Footer';
 import PlanWindow from '../components/PlanWindow';
 import NavBar from '../components/NavBar';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'
 
 const SubscriptionPage = () => {
   const [plans, setPlans] = useState(0);
+  const navigate = useNavigate();
 
   const user = localStorage.getItem('email');
+
+  useEffect(() => {
+    axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+        .then(response => {
+            if (response.status === 200) {
+                console.log(response.data.message);
+            } else {
+                throw new Error('You have to log in first');
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            // Redirect to login page
+            navigate('/Login');
+        });
+  },[]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,6 +43,7 @@ const SubscriptionPage = () => {
 
     fetchUserData();
   }, []);
+
 
   const getSubscriptionType = (type) => {
     switch (type) {

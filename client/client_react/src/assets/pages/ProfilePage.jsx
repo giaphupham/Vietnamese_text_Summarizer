@@ -4,13 +4,31 @@ import { VscAccount } from "react-icons/vsc";
 import { MdCreditScore } from "react-icons/md";
 import axios from 'axios';
 import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
   const [showProfile, setShowProfile] = useState(true);
+  const navigate = useNavigate();
 
   const user = localStorage.getItem('email');
   console.log(user);
+  useEffect(() => {
+    axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+        .then(response => {
+            if (response.status === 200) {
+                console.log(response.data.message);
+            } else {
+                throw new Error('You have to log in first');
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            // Redirect to login page
+            navigate('/Login');
+        });
+  },[]);
+
   useEffect(() => {
     const fetchUserData = async () => {
         try {
