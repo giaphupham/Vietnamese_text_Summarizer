@@ -129,7 +129,7 @@ const InputAndOutput = ({summarizeType}) => {
           ) : (<p className='p-4'>{countWords()} words</p>
           )}
           <button
-          className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full m-2 w-40"
+          className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full my-2 mx-6 w-40"
           onClick={handleSummarize}
           disabled={loading}
           >
