@@ -155,7 +155,7 @@ const InputAndOutput = ({summarizeType}) => {
         <div>
         <div className='flex justify-between items-center'>
           <div
-          className="text-black font-medium py-2 px-4 rounded m-2"
+          className="text-black font-medium py-2 px-2 rounded m-2"
           >
             {sentences} sentences | {words} words
           </div>
