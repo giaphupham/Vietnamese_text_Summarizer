@@ -75,21 +75,27 @@ def summerize_long():
     username = session.get('user')
     
     try:
-        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
-        # print("sub status: ",dtb_result, type(dtb_result))
-                
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()               
+        print("sub status: ",dtb_result, type(dtb_result))        
         subscription = dtb_result.data[0]["subscription"]
+
         if(words_amount > 1500 and subscription==0):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
-
-        output_text = summarizer.summarize(input_text, mode="lsa")
-        score = evaluate.content_based(output_text[0], input_text)
+        result = summarizer.summarize(input_text, mode="lsa")
+        output_text = result[0]
+        score = evaluate.content_based(output_text, input_text)
+        
+        output_words = len(output_text.split())
+        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
+        + output_text.count(':') - 2* output_text.count('...')
 
         return jsonify({
             'message': 'Input text received successfully',
-            'output-text': output_text[0],
+            'output-text': output_text,
+            'words': output_words,
+            'sentences': output_sentences,
             'score': score
         }), 200
     except Exception as e:
@@ -116,10 +122,16 @@ def summerize_short():
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
         output_text = summarizer(input_text)
+        output_words = len(output_text.split())
+        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
+        + output_text.count(':') - 2* output_text.count('...')
+
         return jsonify({
             'message': 'Input text received successfully',
-            'output-text': output_text
-        }), 200
+            'output-text': output_text,
+            'words': output_words,
+            'sentences': output_sentences
+            }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -155,11 +167,18 @@ def summerize_claude():
         )
         summarizer, evaluate = load_model()
         output_text = message.content[0].text.split(":\n")[1]
+
+        output_words = len(output_text.split())
+        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
+        + output_text.count(':') - 2* output_text.count('...')
+
         score = evaluate.content_based(output_text, input_text)
 
         return jsonify({
             'message': 'Input text received successfully',
             'output-text': output_text,
+            'words': output_words,
+            'sentences': output_sentences,
             'score': score
         }), 200
     except Exception as e:
@@ -382,5 +401,3 @@ def upgrade_plan():
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
     app.run(debug=False)
-
-    # test commit
