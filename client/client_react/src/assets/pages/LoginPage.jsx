@@ -36,7 +36,7 @@ function LoginPage() {
     })
     .catch(error => {
       console.log('catch ' + error)
-      alert('Invalid username or password')
+      alert('Login failed! Check your email and password again')
       setLoading(false);
     });
 

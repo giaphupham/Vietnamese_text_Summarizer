@@ -24,7 +24,7 @@ function RegisterPage() {
     })
     .catch(error => {
         console.log('catch ' + error)
-        alert(error)
+        alert('register failed')
         setLoading(false);
     });
   };
