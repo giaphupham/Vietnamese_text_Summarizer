@@ -3,6 +3,8 @@ import Form from "../components/Form";
 import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 
 function RegisterForm({onSubmit, load}) {
   const navigate = useNavigate()
@@ -37,9 +39,11 @@ function RegisterForm({onSubmit, load}) {
           >
             <div className="flex flex-col mb-6">
               <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733] font-medium">
+                <img src="https://img.icons8.com/color/48/000000/google-logo.png" className="w-6 h-6 inline-block mx-2" alt="google-logo"/>
                 Continue with Google
               </button>
               <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733] font-medium">
+                <img src="https://img.icons8.com/color/48/000000/facebook-new.png" className="w-6 h-6 inline-block mx-2" alt="facebook-logo"/>
                 Continue with Facebook
               </button>
             </div>

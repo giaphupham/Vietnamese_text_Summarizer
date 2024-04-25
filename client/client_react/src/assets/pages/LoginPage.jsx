@@ -72,9 +72,11 @@ function LoginPage() {
           >
             <div className="flex flex-col mb-6">
               <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733]">
+              <img src="https://img.icons8.com/color/48/000000/google-logo.png" className="w-6 h-6 inline-block mx-2" alt="google-logo"/>
                 Continue with Google
               </button>
               <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733]">
+              <img src="https://img.icons8.com/color/48/000000/facebook-new.png" className="w-6 h-6 inline-block mx-2" alt="facebook-logo"/>
                 Continue with Facebook
               </button>
             </div>
