@@ -192,7 +192,7 @@ def home():
     if "user" in session:
         return jsonify({'message': 'At home: Logged in successfully'}), 200
     else:
-        return jsonify({'message': 'You have to log in first'}), 401
+        return jsonify({'message': 'You have to log in first'}), 403
 
 @app.route('/register', methods=['POST'])
 def register():
