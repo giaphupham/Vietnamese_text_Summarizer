@@ -416,6 +416,17 @@ def login_and_register_by_3rd_party():
         session['user'] = email
         return redirect(url_for('home'))
 
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.json
+    email = data.get('email')
+    new_password = data.get('new_password')
+
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    supabase.table('user').update({"password": hashed_password}).eq('email', email).execute()
+    
+    return jsonify({'message': 'Password changed successfully'}), 200
+
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)

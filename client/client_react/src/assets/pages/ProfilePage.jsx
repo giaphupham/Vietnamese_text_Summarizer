@@ -5,11 +5,21 @@ import { MdCreditScore } from "react-icons/md";
 import axios from 'axios';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import ChangePasswordModal from '../components/PopUpModal';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
   const [showProfile, setShowProfile] = useState(true);
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const user = localStorage.getItem('email');
   console.log(user);
@@ -62,6 +72,8 @@ function UserProfile(){
     }
   };
 
+
+
   return (
     <div>
     <NavBar isLogin={true}/>
@@ -96,17 +108,27 @@ function UserProfile(){
             </div>
           {
             showProfile ?
-            <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden px-8 py-10 max-w-3xl w-full ml-6">
-              <h1 className="text-sm text-gray-600 p-6">Name: {userData.name}</h1>
-              <p className="text-sm text-gray-600 p-6">Email: {user}</p>
-              <p className="text-sm text-gray-600 p-6">Subscription: {getSubscriptionType(userData.subscription)}</p>
-              <p className="text-sm text-gray-600 p-6">Joined at: {new Date(userData.created_at).toLocaleString()}</p>
+            <div className="flex bg-white border-2 border-gray-200 rounded-xl overflow-hidden px-8 py-10 max-w-3xl w-full ml-6">
+              <div>
+                <h1 className="text-sm text-gray-600 p-6">Name: {userData.name}</h1>
+                <p className="text-sm text-gray-600 p-6">Email: {user}</p>
+                <p className="text-sm text-gray-600 p-6">Subscription: {getSubscriptionType(userData.subscription)}</p>
+                <p className="text-sm text-gray-600 p-6">Joined at: {new Date(userData.created_at).toLocaleString()}</p>
+              </div>
+              <div className='pt-6 pl-6 mx-6 border-l-2 h-min max-h-min'>
+                <p>Account</p>
+                <button className='font-light py-4 font-mono' onClick={openModal}>
+                  Change password
+                </button>
+                <ChangePasswordModal isOpen={isModalOpen} onClose={closeModal} />
+              </div>
             </div> :
             <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden px-8 py-10 max-w-3xl w-full ml-6">
               <p className="text-sm text-gray-600 p-6">Current Plan: </p>
               <p className='text-lg px-6'>{getSubscriptionType(userData.subscription)}</p>
             </div>
           }
+          
         </div>
         </div>
       </div>
