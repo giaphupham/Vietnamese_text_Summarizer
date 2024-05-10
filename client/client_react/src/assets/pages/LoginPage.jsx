@@ -51,9 +51,11 @@ function LoginPage() {
 
     await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
         email: res.email,
+        name: res.name,
+        withCredentials: true,
     }).then(response => {
       console.log('then' + response.data)
-      localStorage.setItem('email', username);
+      localStorage.setItem('email', res.email);
       navigate({ pathname: '/' })
     }).catch(error => {
       console.log('catch ' + error)
@@ -67,10 +69,11 @@ function LoginPage() {
       
     await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
         email: res.email,
+        name: res.name,
         withCredentials: true,
     }).then(response => {
       console.log('then' + response.data)
-      localStorage.setItem('email', username);
+      localStorage.setItem('email', res.email);
       navigate({ pathname: '/' })
     }).catch(error => {
       console.log('catch ' + error)

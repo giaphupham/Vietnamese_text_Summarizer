@@ -402,11 +402,12 @@ def upgrade_plan():
 def login_and_register_by_3rd_party():
     data = request.json
     email = data.get('email')
+    name = data.get('name')
 
     user_email = supabase.table('user').select('email').eq('email', email).execute()
 
     if user_email.data == []:
-        supabase.table('user').insert({"email": email, "password": "null", "name": "null"}).execute()
+        supabase.table('user').insert({"email": email, "password": "null", "name": name}).execute()
         session.permanent = True
         session['user'] = email
         return redirect(url_for('home'))
