@@ -397,8 +397,25 @@ def upgrade_plan():
     supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
 
     return jsonify({'message': 'Plan upgraded successfully'}), 200
-    
+
+@app.route('/login_by_acc', methods=['POST'])
+def login_and_register_by_3rd_party():
+    data = request.json
+    email = data.get('email')
+
+    user_email = supabase.table('user').select('email').eq('email', email).execute()
+
+    if user_email.data == []:
+        supabase.table('user').insert({"email": email, "password": "null", "name": "null"}).execute()
+        session.permanent = True
+        session['user'] = email
+        return redirect(url_for('home'))
+    else:
+        session.permanent = True
+        session['user'] = email
+        return redirect(url_for('home'))
+
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False)
+    app.run(debug=True)
