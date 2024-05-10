@@ -117,7 +117,7 @@ function LoginPage() {
                   fields="name,email"
                   callback={responseFacebook}
                   autoLoad={false}
-                  textButton="Facebook"
+                  textButton="Continue with Facebook"
                   cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
                   access_token={responseFacebook}
                 />

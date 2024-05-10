@@ -3,8 +3,10 @@ import Form from "../components/Form";
 import Input from "../components/Input";
 import { useNavigate } from "react-router-dom";
 import { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'
+import HttpClient from "../components/HttpClient";
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+import FacebookLogin from "react-facebook-login";
 
 function RegisterForm({onSubmit, load}) {
   const navigate = useNavigate()
@@ -27,6 +29,43 @@ function RegisterForm({onSubmit, load}) {
     onSubmit({ username, password, name });
 };
 
+const responseFacebook = async (res) => {
+
+  
+
+  await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
+      email: res.email,
+      name: res.name,
+      withCredentials: true,
+  }).then(response => {
+    console.log('then' + response.data)
+    localStorage.setItem('email', res.email);
+    navigate({ pathname: '/' })
+  }).catch(error => {
+    console.log('catch ' + error)
+    alert('Login failed! Check your email and password again')
+    
+  });
+};
+
+const responseGoogle = async (response) => {
+  const res = jwtDecode(response.credential);
+    
+  await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
+      email: res.email,
+      name: res.name,
+      withCredentials: true,
+  }).then(response => {
+    console.log('then' + response.data)
+    localStorage.setItem('email', res.email);
+    navigate({ pathname: '/' })
+  }).catch(error => {
+    console.log('catch ' + error)
+    alert('Login failed! Check your email and password again')
+    
+  });
+};
+
 
 
   return (
@@ -37,15 +76,29 @@ function RegisterForm({onSubmit, load}) {
             formClass="w-1/4 md:mx-36 xl:mx-80 mx-auto drop-shadow mt-6"
             onSubmit={handleSubmit}
           >
-            <div className="flex flex-col mb-6">
-              <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733] font-medium">
-                <img src="https://img.icons8.com/color/48/000000/google-logo.png" className="w-6 h-6 inline-block mx-2" alt="google-logo"/>
-                Continue with Google
-              </button>
-              <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733] font-medium">
-                <img src="https://img.icons8.com/color/48/000000/facebook-new.png" className="w-6 h-6 inline-block mx-2" alt="facebook-logo"/>
-                Continue with Facebook
-              </button>
+                        <div className="flex flex-col mb-6 justify-center">
+              <div className="mb-4">
+                <FacebookLogin
+                  appId="414388071398115"
+                  fields="name,email"
+                  callback={responseFacebook}
+                  autoLoad={false}
+                  textButton="Continue with Facebook"
+                  cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
+                />
+              </div>
+              <div className="w-full">
+                <GoogleLogin
+                  text="signup_with"
+                  size="large"
+                  width={270}
+                  shape="pill"
+                  onSuccess={responseGoogle}
+                  onError={() => {
+                    console.log('Login Failed');
+                  }}
+                />
+              </div>
             </div>
             <Input
             id="username"
