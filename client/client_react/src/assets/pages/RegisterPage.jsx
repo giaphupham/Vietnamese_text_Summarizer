@@ -7,6 +7,7 @@ import axios from 'axios'
 function RegisterPage() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false);
+  const purpose = 'register';
 
   const handleRegister = async (data) => {
     localStorage.setItem('email', data.username);
@@ -20,6 +21,7 @@ function RegisterPage() {
       console.log('then ' + response)
       const email = data.username;
       sendOTP(email);
+      localStorage.setItem('purpose', purpose);
       navigate({ pathname: '/confirm-email' })
     })
     .catch(error => {

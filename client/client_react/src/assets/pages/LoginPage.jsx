@@ -9,13 +9,20 @@ import axios from 'axios'
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from "react-facebook-login";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 function LoginPage() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
 
+
+  const handleForgotPassword = () => {
+    setForgotPassword(true);
+  };
+  
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value)
   }
@@ -151,7 +158,7 @@ function LoginPage() {
             onChange={passwordChangeHandler}
             value={password}
             ></Input>
-            <div className="flex justify-end">
+            <div className="flex justify-end" onClick={handleForgotPassword}>
                 <b className="text-sky-500 font-medium cursor-pointer ">Forgot password?</b>
             </div>
             <div className="grid grid-cols-1 justify-items-center ">
@@ -173,6 +180,7 @@ function LoginPage() {
             </div>
           </Form>
         </div>
+        {forgotPassword && <ForgotPasswordModal onClose={() => setForgotPassword(false)} />}
     </div>
 
 
