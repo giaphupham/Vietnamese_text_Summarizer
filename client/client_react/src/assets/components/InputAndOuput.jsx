@@ -7,8 +7,9 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import Notification from './NotiWindow';
 import { IoMdCloudDownload } from "react-icons/io";
 import HttpClient from './HttpClient';
+import FeedbackWindow from "./FeedbackWindow";
 
-const InputAndOutput = ({summarizeType}) => {
+const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [showNotification, setShowNotification] = useState(false);
@@ -195,6 +196,7 @@ const InputAndOutput = ({summarizeType}) => {
         </div>
         </div>
       </div>
+      {showFeedback && <FeedbackWindow onClose={Close} />}
     </div>
   );
 };

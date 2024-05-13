@@ -4,8 +4,18 @@ import InputAndOutput from "./InputAndOuput";
 import ControlBar from "./ControlBar";
 import axios from "axios";
 
+
 function MainField() {
   const [summarizeType, setSummarizeType] = useState('short');
+  const [showFeedback, setShowFeedback] = useState(false);
+
+  const handleFeedbackClick = () => {
+    setShowFeedback(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedback(false);
+  };
 
   useEffect(() => {
     axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
@@ -23,8 +33,9 @@ function MainField() {
 },[]);
   return (
     <div className="flex flex-col max-w-6xl mx-auto mt-20 border rounded-xl shadow-md">
-        <ControlBar setSummarizeType={setSummarizeType}/>
-        <InputAndOutput summarizeType={summarizeType}/>
+        <ControlBar setSummarizeType={setSummarizeType} onClick={handleFeedbackClick}/>
+        <InputAndOutput summarizeType={summarizeType} showFeedback={showFeedback} Close={handleCloseFeedback}/>
+       
       
     </div>
   );

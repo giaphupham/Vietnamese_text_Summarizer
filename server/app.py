@@ -351,11 +351,10 @@ def profile():
 def feedback():
     try:
         data = request.json
-        text_id = data.get('text_id')
         star = data.get('star')
         comment = data.get('comment')
 
-        supabase.table('feedback').insert({"textId": text_id, "star": star, "comment": comment}).execute()
+        supabase.table('feedback').insert({ "star": star, "comment": comment}).execute()
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
