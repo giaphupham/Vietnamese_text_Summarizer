@@ -388,6 +388,17 @@ def upload_file():
     
     return jsonify({"message": "File uploaded successfully"}), 200
 
+@app.route('/change_name', methods=['POST'])
+def change_name():
+    data = request.json
+    email = data.get('email')
+    new_name = data.get('new_name')
+    print(email, new_name)
+
+    supabase.table('user').update({"name": new_name}).eq('email', email).execute()
+    
+    return jsonify({'message': 'Name changed successfully'}), 200
+
 @app.route('/upgrade', methods=['POST'])
 def upgrade_plan():
     data = request.json
@@ -429,4 +440,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=True)
+    app.run(debug=False)

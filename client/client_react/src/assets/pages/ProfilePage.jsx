@@ -6,12 +6,23 @@ import axios from 'axios';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import ChangePasswordModal from '../components/PopUpModal';
+import { FaPen } from "react-icons/fa6";
+import ChangeNameModal from '../components/ChangeName';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
   const [showProfile, setShowProfile] = useState(true);
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChangeName, setIsChangeName] = useState(false);
+
+  const openChangeName = () => {
+    setIsChangeName(true);
+  };
+
+  const closeChangeName = () => {
+    setIsChangeName(false);
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -84,8 +95,13 @@ function UserProfile(){
               className="h-24 w-24 rounded-full object-cover"
               src={generateAvatarUrl(userData.name)}
             />
-            <div className='flex flex-col text-2xl px-12 font-light'>
-                <b className='font-semibold '>{userData.name}</b>
+            <div className='flex flex-col text-2xl px-12 font-light py-2'>
+                <div className='flex '>
+                  <b className='font-semibold '>{userData.name}</b>
+                  <FaPen className='text-gray-500 ml-2 my-auto cursor-pointer border-b-2 hover:border-green-700 hover:text-green-700' onClick={openChangeName}/>
+                  <ChangeNameModal isOpen={isChangeName} onClose={closeChangeName} />
+                </div>
+                
                 <b className='font-normal text-base text-slate-700 pt-2'>{user}</b>
             </div>
           </div>
