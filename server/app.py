@@ -7,6 +7,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from model.abstract_model import summarizer
 from supabase import create_client, Client
 from email.message import EmailMessage
+from functools import wraps
 import ssl
 import smtplib
 import secrets
@@ -63,7 +64,24 @@ bcrypt = Bcrypt(app)
 
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'role' not in session or session['role'] != 'admin':
+            return jsonify(message="Admins only!"), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/summarize-long', methods=['POST'])
+@login_required
 def summerize_long():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -103,6 +121,7 @@ def summerize_long():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/summarize-short', methods=['POST'])
+@login_required
 def summerize_short():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -137,6 +156,7 @@ def summerize_short():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/summarize-claude', methods=['POST'])
+@login_required
 def summerize_claude():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -187,12 +207,9 @@ def summerize_claude():
     
 @app.route('/')
 @app.route('/home')
+@login_required
 def home():
-    print(session.get('user'))
-    if "user" in session:
-        return jsonify({'message': 'At home: Logged in successfully'}), 200
-    else:
-        return jsonify({'message': 'You have to log in first'}), 403
+    return jsonify({'message': 'At home: Logged in successfully'}), 200
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -228,13 +245,15 @@ def login():
         try:
             if username and password:
                 # get user from database !!!
-                dtb_result = supabase.table('user').select('password').eq('email', username).execute()
+                dtb_result = supabase.table('user').select('password', 'role').eq('email', username).execute()
                 
                 dtb_hased_password = dtb_result.data[0]["password"] # get the password from the tuple and remove the (' and ',)
+                role = dtb_result.data[0]["role"] 
 
                 if bcrypt.check_password_hash(dtb_hased_password, password):
                     session.permanent = True
                     session['user'] = username
+                    session['role'] = role
                     print("session " + session['user'])
                     return redirect(url_for('home'))
                 else:
@@ -318,6 +337,7 @@ def verify_email():
         return jsonify({'error': 'Wrong OTP'}), 500
 
 @app.route('/save-text', methods=['POST'])
+@login_required
 def save_text():
     try:
         data = request.json
@@ -331,8 +351,16 @@ def save_text():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved successfully"}), 200
-    
+
+@app.route('/admin', methods=['GET'])
+@login_required
+@admin_required
+def admin():
+    return jsonify(message="Welcome, admin!"), 200
+
+
 @app.route('/profile', methods=['POST'])
+@login_required
 def profile():
     try:
         data = request.json
@@ -348,6 +376,7 @@ def profile():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/feedback', methods=['POST'])
+@login_required
 def feedback():
     try:
         data = request.json
@@ -361,11 +390,13 @@ def feedback():
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved feedback successfully"}), 200
 
+
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
     
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload_file():
     
     # Extract file data from JSON payload
@@ -390,10 +421,11 @@ def upload_file():
     return jsonify({"message": "File uploaded successfully"}), 200
 
 @app.route('/upgrade', methods=['POST'])
+@login_required
 def upgrade_plan():
     data = request.json
     plan = data.get('plan')
-    user = data.get('user')
+    user = data.get('user') 
     supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
 
     return jsonify({'message': 'Plan upgraded successfully'}), 200
@@ -401,4 +433,4 @@ def upgrade_plan():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False)
+    app.run(debug=True)
