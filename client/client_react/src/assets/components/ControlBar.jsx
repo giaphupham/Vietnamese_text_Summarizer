@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MdOutlineFeedback } from "react-icons/md";
 
 
-function ControlBar({theme, setSummarizeType}) {
+function ControlBar({theme, setSummarizeType, onClick}) {
   const [mode, setMode] = useState('short');
 
   const handleModeChange = (e) => {
@@ -38,7 +38,7 @@ function ControlBar({theme, setSummarizeType}) {
               </p>
           </div>
         </div>
-        <div className='text-xl self-end hover:bg-gray-200 p-2 rounded-full cursor-pointer'>
+        <div className='text-xl self-end hover:bg-gray-200 p-2 rounded-full cursor-pointer' onClick={onClick}>
           <MdOutlineFeedback />
         </div>
       </div>

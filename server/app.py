@@ -381,11 +381,10 @@ def profile():
 def feedback():
     try:
         data = request.json
-        text_id = data.get('text_id')
         star = data.get('star')
         comment = data.get('comment')
 
-        supabase.table('feedback').insert({"textId": text_id, "star": star, "comment": comment}).execute()
+        supabase.table('feedback').insert({ "star": star, "comment": comment}).execute()
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -421,6 +420,17 @@ def upload_file():
     
     return jsonify({"message": "File uploaded successfully"}), 200
 
+@app.route('/change_name', methods=['POST'])
+def change_name():
+    data = request.json
+    email = data.get('email')
+    new_name = data.get('new_name')
+    print(email, new_name)
+
+    supabase.table('user').update({"name": new_name}).eq('email', email).execute()
+    
+    return jsonify({'message': 'Name changed successfully'}), 200
+
 @app.route('/upgrade', methods=['POST'])
 @login_required
 def upgrade_plan():
@@ -430,7 +440,36 @@ def upgrade_plan():
     supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
 
     return jsonify({'message': 'Plan upgraded successfully'}), 200
+
+@app.route('/login_by_acc', methods=['POST'])
+def login_and_register_by_3rd_party():
+    data = request.json
+    email = data.get('email')
+    name = data.get('name')
+
+    user_email = supabase.table('user').select('email').eq('email', email).execute()
+
+    if user_email.data == []:
+        supabase.table('user').insert({"email": email, "password": "null", "name": name}).execute()
+        session.permanent = True
+        session['user'] = email
+        return redirect(url_for('home'))
+    else:
+        session.permanent = True
+        session['user'] = email
+        return redirect(url_for('home'))
+
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    data = request.json
+    email = data.get('email')
+    new_password = data.get('new_password')
+
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    supabase.table('user').update({"password": hashed_password}).eq('email', email).execute()
     
+    return jsonify({'message': 'Password changed successfully'}), 200
+
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)

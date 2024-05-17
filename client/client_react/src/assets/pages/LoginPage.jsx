@@ -6,13 +6,23 @@ import HttpClient from "../components/HttpClient";
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+import FacebookLogin from "react-facebook-login";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 function LoginPage() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
 
+
+  const handleForgotPassword = () => {
+    setForgotPassword(true);
+  };
+  
   const usernameChangeHandler = (event) => {
     setUsername(event.target.value)
   }
@@ -40,6 +50,43 @@ function LoginPage() {
       setLoading(false);
     });
 
+  };
+
+  const responseFacebook = async (res) => {
+
+    setLoading(true);
+
+    await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
+        email: res.email,
+        name: res.name,
+        withCredentials: true,
+    }).then(response => {
+      console.log('then' + response.data)
+      localStorage.setItem('email', res.email);
+      navigate({ pathname: '/' })
+    }).catch(error => {
+      console.log('catch ' + error)
+      alert('Login failed! Check your email and password again')
+      setLoading(false);
+    });
+  };
+
+  const responseGoogle = async (response) => {
+    const res = jwtDecode(response.credential);
+      
+    await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
+        email: res.email,
+        name: res.name,
+        withCredentials: true,
+    }).then(response => {
+      console.log('then' + response.data)
+      localStorage.setItem('email', res.email);
+      navigate({ pathname: '/' })
+    }).catch(error => {
+      console.log('catch ' + error)
+      alert('Login failed! Check your email and password again')
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -70,15 +117,30 @@ function LoginPage() {
             formClass="w-1/4 md:mx-36 xl:mx-80 mx-auto drop-shadow mt-6"
             onSubmit={handleLogin}
           >
-            <div className="flex flex-col mb-6">
-              <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733]">
-              <img src="https://img.icons8.com/color/48/000000/google-logo.png" className="w-6 h-6 inline-block mx-2" alt="google-logo"/>
-                Continue with Google
-              </button>
-              <button className="m-1 p-1 rounded-full border border-[#178733] text-[#178733]">
-              <img src="https://img.icons8.com/color/48/000000/facebook-new.png" className="w-6 h-6 inline-block mx-2" alt="facebook-logo"/>
-                Continue with Facebook
-              </button>
+            <div className="flex flex-col mb-6 justify-center">
+              <div className="mb-4">
+                <FacebookLogin
+                  appId="414388071398115"
+                  fields="name,email"
+                  callback={responseFacebook}
+                  autoLoad={false}
+                  textButton="Continue with Facebook"
+                  cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
+                  access_token={responseFacebook}
+                />
+              </div>
+              <div className="w-full">
+                <GoogleLogin
+                  text="signin_with"
+                  size="large"
+                  width={270}
+                  shape="pill"
+                  onSuccess={responseGoogle}
+                  onError={() => {
+                    console.log('Login Failed');
+                  }}
+                />
+              </div>
             </div>
             <Input
             id="username"
@@ -96,13 +158,13 @@ function LoginPage() {
             onChange={passwordChangeHandler}
             value={password}
             ></Input>
-            <div className="flex justify-end">
+            <div className="flex justify-end" onClick={handleForgotPassword}>
                 <b className="text-sky-500 font-medium cursor-pointer ">Forgot password?</b>
             </div>
             <div className="grid grid-cols-1 justify-items-center ">
                 <button
                     type="submit"
-                    className="p-2 bg-[#178733] rounded-full w-full mt-10 mb-4"
+                    className="p-2 bg-[#178733] rounded-full w-full mt-10 mb-4 hover:bg-[#0f5e2b]"
                     disabled={loading}
                 >
             {loading ? (
@@ -118,6 +180,7 @@ function LoginPage() {
             </div>
           </Form>
         </div>
+        {forgotPassword && <ForgotPasswordModal onClose={() => setForgotPassword(false)} />}
     </div>
 
 

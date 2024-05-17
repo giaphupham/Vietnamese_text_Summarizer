@@ -24,7 +24,16 @@ function ConfirmEmailPage() {
 
             if (response.status === 200) {
                 console.log('Email verified successfully!');
-                navigate('/login');
+                const purpose = localStorage.getItem('purpose');
+                if (purpose === 'register') {
+                    alert('Email verified successfully! Please log in to continue.');
+                    navigate('/login');
+                } else if (purpose === 'forgot') {
+                    navigate('/forgot-password');
+                } else {
+                    // Default redirection if purpose is not set or unrecognized
+                    navigate('/');
+                }
             } else {
                 alert('Error: ' + response.data.error);
             }
