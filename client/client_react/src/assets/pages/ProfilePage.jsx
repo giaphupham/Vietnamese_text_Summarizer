@@ -9,6 +9,8 @@ import ChangePasswordModal from '../components/PopUpModal';
 import { FaPen } from "react-icons/fa6";
 import ChangeNameModal from '../components/ChangeName';
 import HttpClient from '../components/HttpClient';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
@@ -63,6 +65,7 @@ function UserProfile(){
             console.log(response.data);
         } catch (error) {
             console.error('Error fetching user data:', error);
+            toast.error('Error fetching user data', {autoClose: 3000});
         }
     };
 
@@ -152,6 +155,7 @@ function UserProfile(){
         </div>
       </div>
       <Footer />
+      <ToastContainer />
     </div>
   );
 };

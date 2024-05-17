@@ -11,6 +11,8 @@ import CardInput from '../components/CardInput';
 // Stripe
 import {useStripe, useElements, CardElement} from '@stripe/react-stripe-js';
 import HttpClient from './HttpClient';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const useStyles = makeStyles({
@@ -50,9 +52,11 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
+        toast.success('Upgrade successfully', {autoClose: 3000});
         // You can add further actions here if needed
       } else {
         console.error('Failed to send upgrade request');
+        toast.error('Failed to send upgrade request', {autoClose: 3000});
       }
     } catch (error) {
       console.error('Error:', error);
@@ -81,7 +85,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
         console.log('Hell yea, you got that sub money!');
         console.log(plan_id);
         sendUpgradeRequest(plan_id);
-        alert('Payment successful');
+        toast.success('Payment successful', {autoClose: 3000});
         window.location.reload();
 
       }
@@ -122,7 +126,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
               console.log('Hell yea, you got that sub money!');
               console.log(plan_id);
               sendUpgradeRequest(plan_id);
-              alert('Payment successful');
+              toast.success('Payment successful', {autoClose: 3000});
               window.location.reload();
             }
           });
@@ -130,7 +134,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
           console.log('Hell yea, you got that sub money!');
           console.log(plan_id);
           sendUpgradeRequest(plan_id);
-          alert('Payment successful');
+          toast.success('Payment successful', {autoClose: 3000});
           window.location.reload();
         }
       }
@@ -159,6 +163,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
               </div>
           </CardContent>
         </Card>
+        <ToastContainer />
     </div>
   );
 };

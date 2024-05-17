@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 
 
+
 const ChangePasswordModal = ({ isOpen, onClose }) => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
@@ -33,6 +34,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setSuccess(true);
         setError(null);
         onClose();
+        alert('Password changed successfully!');
       } catch (error) {
         // Handle error
         setSuccess(false);

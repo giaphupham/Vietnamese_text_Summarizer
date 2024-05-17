@@ -7,6 +7,8 @@ import HttpClient from "../components/HttpClient";
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from "react-facebook-login";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function RegisterForm({onSubmit, load}) {
   const navigate = useNavigate()
@@ -43,7 +45,7 @@ const responseFacebook = async (res) => {
     navigate({ pathname: '/' })
   }).catch(error => {
     console.log('catch ' + error)
-    alert('Login failed! Check your email and password again')
+    toast.error('Login failed! Check your email and password again', {autoClose: 3000});
     
   });
 };
@@ -61,7 +63,7 @@ const responseGoogle = async (response) => {
     navigate({ pathname: '/' })
   }).catch(error => {
     console.log('catch ' + error)
-    alert('Login failed! Check your email and password again')
+    toast.error('Login failed! Check your email and password again', {autoClose: 3000});
     
   });
 };
@@ -144,6 +146,7 @@ const responseGoogle = async (response) => {
             </div>
           </Form>
         </div>
+        <ToastContainer />
     </div>
 
 

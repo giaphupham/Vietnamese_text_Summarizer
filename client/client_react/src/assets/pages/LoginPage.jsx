@@ -10,6 +10,8 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from "react-facebook-login";
 import ForgotPasswordModal from "../components/ForgotPasswordModal";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -46,7 +48,7 @@ function LoginPage() {
     })
     .catch(error => {
       console.log('catch ' + error)
-      alert('Login failed! Check your email and password again')
+      toast.error('Login failed! Check your email and password again', {autoClose: 3000});
       setLoading(false);
     });
 
@@ -66,7 +68,7 @@ function LoginPage() {
       navigate({ pathname: '/' })
     }).catch(error => {
       console.log('catch ' + error)
-      alert('Login failed! Check your email and password again')
+      toast.error('Login failed! Please try again', {autoClose: 3000});
       setLoading(false);
     });
   };
@@ -84,7 +86,7 @@ function LoginPage() {
       navigate({ pathname: '/' })
     }).catch(error => {
       console.log('catch ' + error)
-      alert('Login failed! Check your email and password again')
+      toast.error('Login failed! Please try again', {autoClose: 3000});
       setLoading(false);
     });
   };
@@ -181,6 +183,7 @@ function LoginPage() {
           </Form>
         </div>
         {forgotPassword && <ForgotPasswordModal onClose={() => setForgotPassword(false)} />}
+        <ToastContainer />
     </div>
 
 

@@ -5,6 +5,8 @@ import PaymentPopUp from './PaymentPopUp';
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import HttpClient from "./HttpClient";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // the key is located in the .env file
 const stripePromise = loadStripe('pk_test_51PH03zRtjuoXgTndvOsbkwlA2KxaEXsvXPb7dMx849pchh9jo4ufF6kRAaOuwgpVyJvhh27Rumu1MXP3iZRq0rSF00c43yVrJG');
@@ -49,11 +51,12 @@ const PlanWindow = ({ plan }) => {
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
-        alert('Upgrade successful');
+        toast.success('Upgrade successfully', {autoClose: 3000});
         window.location.reload();
         // You can add further actions here if needed
       } else {
         console.error('Failed to send upgrade request');
+        toast.error('Failed to send upgrade request', {autoClose: 3000});
       }
     } catch (error) {
       console.error('Error:', error);
@@ -83,6 +86,7 @@ const PlanWindow = ({ plan }) => {
             {plan.cons.map((con, index) => <li key={index}>{con}</li>)}
           </ul>
         </div>
+        <ToastContainer />
       </div>
     </Elements>
   );

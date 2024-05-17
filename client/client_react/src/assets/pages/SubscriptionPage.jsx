@@ -5,6 +5,8 @@ import NavBar from '../components/NavBar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import HttpClient from '../components/HttpClient';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const SubscriptionPage = () => {
@@ -40,6 +42,7 @@ const SubscriptionPage = () => {
             
         } catch (error) {
             console.error('Error fetching user data:', error);
+            toast.error('Error fetching user data', {autoClose: 3000});
         }
     };
 
@@ -98,6 +101,7 @@ const SubscriptionPage = () => {
 
     </div>
           <Footer />
+          <ToastContainer />
     </div>
   );
 }

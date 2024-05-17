@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import ReactStars from "react-rating-stars-component";
 import axios from 'axios';
 import HttpClient from './HttpClient';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const FeedbackWindow = ({ onClose }) => {
   const [feedback, setFeedback] = useState('');
@@ -20,7 +22,7 @@ const FeedbackWindow = ({ onClose }) => {
       'star': rating,
     }).then(response => {
       console.log(response.data);
-      alert('Feedback submitted successfully');
+      toast.success('Feedback submitted successfully!', {autoClose: 3000});
       onClose();
     }).catch(error => {
       console.log(error);

@@ -8,6 +8,8 @@ import Notification from './NotiWindow';
 import { IoMdCloudDownload } from "react-icons/io";
 import HttpClient from './HttpClient';
 import FeedbackWindow from "./FeedbackWindow";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [inputText, setInputText] = useState('');
@@ -77,7 +79,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
       })
       .catch(error => {
         console.log('catch ' + error)
-        alert(error)
+        toast.error('Summarization failed! Please try again', {autoClose: 3000});
         setLoading(false);
       });
 
@@ -197,6 +199,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         </div>
       </div>
       {showFeedback && <FeedbackWindow onClose={Close} />}
+      <ToastContainer />
     </div>
   );
 };

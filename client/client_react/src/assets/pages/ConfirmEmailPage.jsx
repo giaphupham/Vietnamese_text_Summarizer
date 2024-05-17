@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import NavBar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function ConfirmEmailPage() {
     const navigate = useNavigate();
@@ -26,7 +28,7 @@ function ConfirmEmailPage() {
                 console.log('Email verified successfully!');
                 const purpose = localStorage.getItem('purpose');
                 if (purpose === 'register') {
-                    alert('Email verified successfully! Please log in to continue.');
+                    toast.success('Email verified successfully! Please log in to continue.', {autoClose: 3000});
                     navigate('/login');
                 } else if (purpose === 'forgot') {
                     navigate('/forgot-password');
@@ -35,11 +37,12 @@ function ConfirmEmailPage() {
                     navigate('/');
                 }
             } else {
-                alert('Error: ' + response.data.error);
+                toast.error(response.data.error, {autoClose: 3000});
             }
         } catch (error) {
             console.log(error);
-            alert('Something went wrong');
+            toast.error('Something went wrong', {autoClose: 3000});
+
         }
     };
     
@@ -74,6 +77,7 @@ function ConfirmEmailPage() {
                 </div>
             </div>   
         </div>
+        <ToastContainer />
         </div>
     );
 }

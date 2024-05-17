@@ -3,6 +3,8 @@ import NavBar from "../components/NavBar";
 import RegisterForm from "../components/RegisterForm";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios'
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -26,7 +28,7 @@ function RegisterPage() {
     })
     .catch(error => {
         console.log('catch ' + error)
-        alert('register failed')
+        toast.error('Register failed! Please try again', {autoClose: 3000});
         setLoading(false);
     });
   };
@@ -37,7 +39,7 @@ function RegisterPage() {
         console.log('OTP sent successfully!');
     } catch (error) {
         console.error(error);
-        alert('Error sending OTP');
+        toast.error('Error sending OTP', {autoClose: 3000});
     }
 };
     useEffect(() => {
@@ -61,6 +63,7 @@ function RegisterPage() {
     <div>
         <NavBar isLogin={false}/>
         <RegisterForm onSubmit={handleRegister} load={loading} />
+        <ToastContainer />
     </div>
 
 

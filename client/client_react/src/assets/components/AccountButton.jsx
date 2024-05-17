@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGem} from '@fortawesome/free-regular-svg-icons'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const AccountButton = () => {
@@ -28,10 +30,12 @@ const AccountButton = () => {
         } else {
           // Handle logout failure
           console.error('Logout failed');
+          toast.error('Logout failed', {autoClose: 3000});
         }
       })
       .catch(error => {
         console.error('Error during logout:', error);
+        toast.error('Error during logout', {autoClose: 3000});
       });
   };
 
@@ -77,6 +81,7 @@ const AccountButton = () => {
         </div>
       )}
       </button>
+      <ToastContainer />
       </div>
 
       
