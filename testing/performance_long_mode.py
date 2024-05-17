@@ -1,4 +1,4 @@
-from locust import SequentialTaskSet, HttpUser, constant, task, between # locust 2.26.0
+from locust import SequentialTaskSet, HttpUser, constant, task # locust 2.26.0
 import json, logging, sys
 
 
@@ -107,4 +107,4 @@ class LongSummarizer(SequentialTaskSet):
 class MyLoadTest(HttpUser):
     host = "http://127.0.0.1:5000"
     tasks = [LongSummarizer]
-    wait_time = between(0.1, 0.5)
+    wait_time = constant(1)
