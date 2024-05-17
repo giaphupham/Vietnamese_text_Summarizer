@@ -67,11 +67,11 @@ class LongSummarizer(SequentialTaskSet):
                 return "Error: File '{}' not found.".format(file_path)
             except Exception as e:
                 return "Error: " +str(e)
-        text = read_file('data/around500words.txt')
+        text = read_file('data/around1600words.txt')
         # print(text)
         data ={
             'input-text': text,
-            'sentences': 23,
+            'sentences': 63,
             'withCredentials':'true'
         }
         headers = {
@@ -95,8 +95,8 @@ class LongSummarizer(SequentialTaskSet):
         
         response = self.client.post("/summarize-long", data=json.dumps(data), headers=headers) 
 
-        data = response.json()
-        # print(data.get('output-text'))
+        output_data = response.json()
+        print(output_data.get('output-text'))
         if response.status_code == 200:
             logging.info("Summarized long mode successfully!")
         else:

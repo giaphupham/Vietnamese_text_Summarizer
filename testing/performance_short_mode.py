@@ -67,11 +67,11 @@ class ShortSummarizer(SequentialTaskSet):
                 return "Error: File '{}' not found.".format(file_path)
             except Exception as e:
                 return "Error: " +str(e)
-        text = read_file('data/around500words.txt')
+        text = read_file('data/around300words.txt')
         # print(text)
         data ={
             'input-text': text,
-            'sentences': 23,
+            'sentences': 11, # 11 63
             'withCredentials':'true'
         }
         headers = {
@@ -79,7 +79,7 @@ class ShortSummarizer(SequentialTaskSet):
             'Accept-Encoding': 'gzip, deflate, br, zstd',
             'Accept-Language': 'en-US,en;q=0.9',
             'Connection': 'keep-alive',
-            'Content-Length': '3507',
+            'Content-Length': '391',
             'Content-Type': 'application/json',
             'Cookie': 'session=qW7Gqkdq9t4A3sz6zS94_ptTNKf8azc5Tp5bjh9NW8c',
             'Host': '127.0.0.1:5000', # replace this with hosted backend server
@@ -95,8 +95,8 @@ class ShortSummarizer(SequentialTaskSet):
         
         response = self.client.post("/summarize-short", data=json.dumps(data), headers=headers) 
 
-        data = response.json()
-        # print(data.get('output-text'))
+        output_data = response.json()
+        print(output_data.get('output-text'))
         if response.status_code == 200:
             logging.info("Summarized short mode successfully!")
         else:
