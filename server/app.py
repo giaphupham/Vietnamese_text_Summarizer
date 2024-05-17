@@ -84,8 +84,9 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print("session: ", session.get('user'))
         if 'user' not in session:
-            return redirect(url_for('login'))
+            return redirect(url_for('login')), 401
         return f(*args, **kwargs)
     return decorated_function
 
@@ -468,10 +469,11 @@ def admin():
     return jsonify(message="Welcome, admin!"), 200
 
 
-@app.route('/profile', methods=['POST'])
+@app.route('/profile', methods=['POST', 'GET'])
 @login_required
 def profile():
     try:
+        print (session.get('user'))
         data = request.json
         username = data.get('username')
 
@@ -581,4 +583,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False)
+    app.run(debug=True)

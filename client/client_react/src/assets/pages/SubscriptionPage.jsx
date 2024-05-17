@@ -4,6 +4,8 @@ import PlanWindow from '../components/PlanWindow';
 import NavBar from '../components/NavBar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
+import HttpClient from '../components/HttpClient';
+
 
 const SubscriptionPage = () => {
   const [plans, setPlans] = useState(0);
@@ -30,7 +32,7 @@ const SubscriptionPage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
         try {
-            const response = await axios.post('http://127.0.0.1:5000/profile', {
+            const response = await HttpClient.post('http://127.0.0.1:5000/profile', {
                 username: user ,
             });
             setPlans(response.data.subscription);

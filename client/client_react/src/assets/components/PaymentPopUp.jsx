@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Payment({isOpen, onClose}) {
+function Payment({isOpen, onClose, plan_id}) {
   const classes = useStyles();
   const [status, setStatus] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -42,6 +42,21 @@ function Payment({isOpen, onClose}) {
   const elements = useElements();
 
   const email = localStorage.getItem('email');
+
+  const sendUpgradeRequest = async (selectedPlan) => {
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
+
+      if (response.status === 200) {
+        console.log('Upgrade request sent successfully');
+        // You can add further actions here if needed
+      } else {
+        console.error('Failed to send upgrade request');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const handleSubmitSub = async (event) => {
     if (!stripe || !elements) {
@@ -63,6 +78,10 @@ function Payment({isOpen, onClose}) {
         // Show error in payment form
       } else {
         console.log('Hell yea, you got that sub money!');
+        console.log(plan_id);
+        sendUpgradeRequest(plan_id);
+        window.location.reload();
+
       }
     } else {
       const result = await stripe.createPaymentMethod({
@@ -98,10 +117,16 @@ function Payment({isOpen, onClose}) {
             } else {
               // Show a success message to your customer
               console.log('Hell yea, you got that sub money!');
+              console.log(plan_id);
+              sendUpgradeRequest(plan_id);
+              window.location.reload();
             }
           });
         } else {
           console.log('Hell yea, you got that sub money!');
+          console.log(plan_id);
+          sendUpgradeRequest(plan_id);
+          window.location.reload();
         }
       }
     }

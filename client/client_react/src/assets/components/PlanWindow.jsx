@@ -11,14 +11,37 @@ const stripePromise = loadStripe('pk_test_51PH03zRtjuoXgTndvOsbkwlA2KxaEXsvXPb7d
 
 
 const PlanWindow = ({ plan }) => {
-  const navigate = useNavigate();
-  const [plans, setPlans] = useState(0);
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [plan_id, setPlanId] = useState(0);
 
-  const open = () => {
-    setIsModalOpen(true);
+  const handleUpgrade = async (e) => {
+    e.preventDefault();
+    if(plan.id === 0) {
+      console.log('Free plan selected');
+      console.log(plan.id);
+      sendUpgradeRequest(plan.id);
+    }
+    else{
+      console.log('Pro plan selected');
+      setPlanId(plan.id)
+      //navigate('/payment');
+      setIsModalOpen(true)
+    }
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/profile', {
+                withCredentials: true,
+            });
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    fetchUserData();
+  }, []);
 
   const close = () => {
     setIsModalOpen(false);
@@ -46,10 +69,10 @@ const PlanWindow = ({ plan }) => {
         {plan.plans  ? (
           <button className="w-full my-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-full" disabled>Current Plan</button>
             ) : (
-          <button className="w-full my-2 bg-[#178733] hover:bg-[#0B6722] text-white font-semibold py-2 px-4 rounded-full" onClick={open}>Upgrade</button>
+          <button className="w-full my-2 bg-[#178733] hover:bg-[#0B6722] text-white font-semibold py-2 px-4 rounded-full" onClick={handleUpgrade}>Upgrade</button>
             )
             }
-          <PaymentPopUp isOpen={isModalOpen}  onClose={close} />
+          <PaymentPopUp isOpen={isModalOpen}  onClose={close} plan_id={plan_id}/>
         
         <div className="plan-details">
           <p><strong>Price:</strong> {plan.price}</p>

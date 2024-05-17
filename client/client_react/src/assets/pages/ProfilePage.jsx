@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import ChangePasswordModal from '../components/PopUpModal';
 import { FaPen } from "react-icons/fa6";
 import ChangeNameModal from '../components/ChangeName';
+import HttpClient from '../components/HttpClient';
 
 function UserProfile(){
   const [userData, setUserData] = useState(NaN);
@@ -34,6 +35,7 @@ function UserProfile(){
 
   const user = localStorage.getItem('email');
   console.log(user);
+
   useEffect(() => {
     axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
         .then(response => {
@@ -41,6 +43,7 @@ function UserProfile(){
                 console.log(response.data.message);
             } else {
                 throw new Error('You have to log in first');
+                
             }
         })
         .catch(error => {
@@ -53,7 +56,7 @@ function UserProfile(){
   useEffect(() => {
     const fetchUserData = async () => {
         try {
-            const response = await axios.post('http://127.0.0.1:5000/profile', {
+            const response = await HttpClient.post('http://127.0.0.1:5000/profile', {
                 username: user ,
             });
             setUserData(response.data);
