@@ -10,6 +10,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import CardInput from '../components/CardInput';
 // Stripe
 import {useStripe, useElements, CardElement} from '@stripe/react-stripe-js';
+import HttpClient from './HttpClient';
 
 
 const useStyles = makeStyles({
@@ -33,7 +34,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Payment({isOpen, onClose, plan_id}) {
+function Payment({isOpen, onClose, plan_id, price_id}) {
   const classes = useStyles();
   const [status, setStatus] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -45,7 +46,7 @@ function Payment({isOpen, onClose, plan_id}) {
 
   const sendUpgradeRequest = async (selectedPlan) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
+      const response = await HttpClient.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
@@ -80,6 +81,7 @@ function Payment({isOpen, onClose, plan_id}) {
         console.log('Hell yea, you got that sub money!');
         console.log(plan_id);
         sendUpgradeRequest(plan_id);
+        alert('Payment successful');
         window.location.reload();
 
       }
@@ -99,6 +101,7 @@ function Payment({isOpen, onClose, plan_id}) {
         const payload = {
           email: email,
           payment_method: result.paymentMethod.id,
+          price_id: price_id,
         };
         // Otherwise send paymentMethod.id to your server
         const res = await axios.post('http://127.0.0.1:5000/sub', payload);
@@ -119,6 +122,7 @@ function Payment({isOpen, onClose, plan_id}) {
               console.log('Hell yea, you got that sub money!');
               console.log(plan_id);
               sendUpgradeRequest(plan_id);
+              alert('Payment successful');
               window.location.reload();
             }
           });
@@ -126,6 +130,7 @@ function Payment({isOpen, onClose, plan_id}) {
           console.log('Hell yea, you got that sub money!');
           console.log(plan_id);
           sendUpgradeRequest(plan_id);
+          alert('Payment successful');
           window.location.reload();
         }
       }

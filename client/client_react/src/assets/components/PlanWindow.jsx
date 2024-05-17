@@ -13,6 +13,7 @@ const stripePromise = loadStripe('pk_test_51PH03zRtjuoXgTndvOsbkwlA2KxaEXsvXPb7d
 const PlanWindow = ({ plan }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [plan_id, setPlanId] = useState(0);
+  const [price, setPrice] = useState("");
 
   const handleUpgrade = async (e) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ const PlanWindow = ({ plan }) => {
     else{
       console.log('Pro plan selected');
       setPlanId(plan.id)
+      setPrice(plan.price_id)
       //navigate('/payment');
       setIsModalOpen(true)
     }
@@ -72,7 +74,7 @@ const PlanWindow = ({ plan }) => {
           <button className="w-full my-2 bg-[#178733] hover:bg-[#0B6722] text-white font-semibold py-2 px-4 rounded-full" onClick={handleUpgrade}>Upgrade</button>
             )
             }
-          <PaymentPopUp isOpen={isModalOpen}  onClose={close} plan_id={plan_id}/>
+          <PaymentPopUp isOpen={isModalOpen}  onClose={close} plan_id={plan_id} price_id={price}/>
         
         <div className="plan-details">
           <p><strong>Price:</strong> {plan.price}</p>

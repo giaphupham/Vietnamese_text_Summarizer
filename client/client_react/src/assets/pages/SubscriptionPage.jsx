@@ -79,18 +79,20 @@ const SubscriptionPage = () => {
             plans: getSubscriptionType(plans) === 'Pro',
             id:1,
             name: 'Pro',
-            price: '$20',
+            price: '$0.99',
             pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features'],
-            cons: ['Limited to 5 users']
+            cons: ['Limited to 5 users'],
+            price_id:'price_1PH4H2RtjuoXgTndyQUnP94v'
           }} />
 
           <PlanWindow plan={{
             plans: getSubscriptionType(plans) === 'Premium',
             id:2,
             name: 'Premium',
-            price: '$50',
+            price: '$9.99',
             pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features', 'Unlimited users'],
-            cons: ['No cons']
+            cons: ['No cons'],
+            price_id:'price_1PHGgsRtjuoXgTndlp1SRwHQ'
           }} />
       </div>
 

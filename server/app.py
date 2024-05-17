@@ -121,6 +121,9 @@ def pay():
 def sub():
     email = request.json.get('email', None)
     payment_method = request.json.get('payment_method', None)
+    price_id = request.json.get('price_id', None)
+
+    print(email, payment_method, price_id)
 
     if not email:
         return 'You need to send an Email!', 400
@@ -140,7 +143,7 @@ def sub():
         customer=customer['id'],
         items=[
             {
-            'price': 'price_1PH4H2RtjuoXgTndyQUnP94v',
+            'price': price_id,
             },
         ],
         expand=['latest_invoice.payment_intent'],
@@ -541,7 +544,7 @@ def change_name():
     
     return jsonify({'message': 'Name changed successfully'}), 200
 
-@app.route('/upgrade', methods=['POST'])
+@app.route('/upgrade', methods=['POST', 'GET'])
 @login_required
 def upgrade_plan():
     data = request.json
