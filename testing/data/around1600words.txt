@@ -1,0 +1,45 @@
+Tháng 1 năm 2008 tại California, Hoa Kì, một câu chuyện khởi nghiệp kỳ diệu bắt đầu.
+Jan Koum, một kỹ sư giàu kinh nghiệm từ Yahoo đã mơ ước về một tương lại tại Facebook nhưng ngay lập tức anh ta bị từ chối.
+Một năm sau, anh ta mua chiếc IPhone đầu tiên và lập tức nhận thấy được tiềm năng khổng lồ của cửa hàng ứng dụng AppStore mới.
+Vì vậy, Jan Koum đã quyết định tập hợp một nhóm các đồng nghiệp cũ của mình tại Yahoo để xây dựng một ứng dụng nhắn tin và đặt tên cho nó là WhatsApp với mục tiêu là thay thế cho dịch vụ SMS đắt đỏ.
+Hơn cả mong đợi, WhatsApp tăng trưởng với một tốc độ chóng mặt với hơn 1 triệu người dùng đăng ký mỗi ngày.
+Với 450 triệu người dùng hoạt động hằng ngày, WhatsApp đã phải xử lý 50 tỷ tin nhắn mỗi ngày. Và điều đáng kinh ngạc là họ vận hành một hệ thống như vậy chỉ với 32 kỹ sư.
+Sự bùng nổ trong tăng trưởng sản phẩm là điều ai cũng mong muốn, tùy nhiên nó cũng là một thách thức không hề nhỏ. Jan Koum cùng team WhatsApp đã phải nhanh chóng tiếp thu và áp dụng những kinh nghiệm kỹ thuật hàng đầu để đối mặt và vượt qua những rào cản đó.
+Bí Mật Kỹ Thuật Đằng Sau Sự Mở Rộng Của WhatsApp
+Những chiến lược kỹ thuật mà WhatsApp áp dụng để đối phó với sự mở rộng cực lớn:
+1. Tập Trung Tối Đa vào Tính Năng Chính
+WhatsApp tập trung mọi nguồn lực vào tính năng chính: nhắn tin.
+Họ không phân tâm để tạo ra một mạng lưới quảng cáo hay phát triển một nền tảng mạng xã hội.
+Đồng thời, WhatsApp quyết tâm loại bỏ hoàn toàn việc thêm các tính năng không cần thiết vào sản phẩm.
+Việc thêm quá nhiều tính năng thừa thãi có thể khiến sản phẩm trở nên phức tạp và khó sử dụng.
+Quan trọng nhất, họ không bao giờ để mất điểm về độ tin cậy của ứng dụng - yếu tố được ưu tiên hàng đầu.
+2. Technology Stack
+WhatsApp đã lựa chọn Erlang để xây dựng các tính năng cốt lõi trên máy chủ của mình, dựa trên những ưu điểm nổi bật của ngôn ngữ lập trình này:
+Erlang cung cấp khả năng mở rộng cao mà không yêu cầu quá nhiều tài nguyên, tức là nó cho phép WhatsApp xử lý lượng lớn tin nhắn mà không yêu cầu nhiều tài nguyên hệ thống. Điều này vô cùng quan trọng với một ứng dụng nhắn tin, nơi hàng tỷ tin nhắn được trao đổi mỗi ngày.
+Erlang hỗ trợ hot-loading, một tính năng cho phép cập nhật và triển khai những đoạn code mới mà không cần phải khởi động lại máy chủ hoặc chuyển hướng lưu lượng truy cập. Điều này đảm bảo tính sẵn sàng cao (high availability) của dịch vụ, vì người dùng không bao giờ bị đứt quãng trong việc sử dụng dịch vụ ngay cả khi có cập nhật phần mềm.
+Trong Erlang, luồng (threads) được quản lý bởi chính ngôn ngữ và máy ảo Erlang thay vì hệ điều hành như Java hoặc C++. Điều này giúp Erlang không cần phải lưu trạng thái CPU toàn bộ khi thực hiện context switching, làm cho quá trình này trở nên tiết kiệm tài nguyên và hiệu quả hơn.
+3. Tại sao phải phát minh lại bánh xe?
+Không cần phải tái tạo lại bánh xe - hãy tận dụng mã nguồn mở hoặc giải pháp thương mại có sẵn.
+Khi xây dựng WhatsApp, đội ngũ kỹ thuật đã áp dụng triết lý "Không tái tạo lại bánh xe". Thay vào đó, họ chọn ejabberd - một máy chủ tin nhắn thời gian thực mã nguồn mở được viết bằng Erlang, làm nền tảng cốt lõi.
+WhatsApp được phát triển trên ejabberd, nhưng đội ngũ cũng đã tinh chỉnh và viết lại một số thành phần cốt lõi của ejabberd để phù hợp với nhu cầu cụ thể của mình.
+Ngoài ra, WhatsApp còn** tích hợp các dịch vụ bên thứ ba như Google Push để cung cấp chức năng thông bá**o.
+4. Cross-Cutting Concerns
+WhatsApp đã đặt trọng tâm vào việc giải quyết các Cross-Cutting Concerns để nâng cao chất lượng sản phẩm.
+Cross-Cutting Concerns bao gồm các yếu tố ảnh hưởng đến nhiều phần của một hệ thống và không dễ dàng có thể cô lập hoặc phân chia chúng theo từng chức năng. Các vấn đề này thường liên quan đến các yếu tố nền tảng hoặc chức năng hỗ trợ chính chứ không phải là các chức năng cụ thể của ứng dụng.
+Một ví dụ điển hình là việc giám sát và cảnh báo về tình trạng hoạt động của dịch vụ, điều này đòi hỏi sự chú ý đến toàn bộ hệ thống chứ không chỉ một phần riêng lẻ.
+Để tăng cường chất lượng phát triển và quy trình triển khai phần mềm, WhatsApp đã triển khai hai phương pháp quan trọng: Continuous Integration(Tích hợp liên tục) và Continuous Delivery (Phát hành liên tục).
+Continuous Integration: là quá trình liên tục đưa các thay đổi mã nguồn vào một kho lưu trữ chung. Điều này giúp đội ngũ phát triển phần mềm có thể **phát hiện sớm và giải quyết các vấn đề, giảm thiểu rủi ro **liên quan đến việc tích hợp các phần mã với nhau, đồng thời duy trì sự ổn định và tính nhất quán của sản phẩm.
+Continuous Delivery: một bước tiếp theo của Continuous Integration, là quá trình triển khai mã nguồn đã được tích hợp và kiểm thử vào môi trường kiểm thử hoặc sản xuất một cách tự động và liên tục. Mục tiêu là đảm bảo khả năng phát hành một phiên bản mới của sản phẩm một cách nhanh chóng và đáng tin cậy vào bất kỳ thời điểm nào, giúp tối ưu hóa thời gian đưa sản phẩm đến tay người dùng.
+5. Tối Ưu Hóa Khả Năng Mở Rộng
+WhatsApp đã áp dụng chiến lược mở rộng chéo(Diagonal Scaling) để tối ưu hóa chi phí và đơn giản hóa việc quản lý hệ thống.
+Mở rộng theo chiều dọc(Vertical scaling): **Nâng cấp cấu hình máy chủ hiện có **(như CPU, RAM, Disk,…) để nó có thể tăng khả năng xử lý. Phương pháp này thường hạn chế bởi giới hạn phần cứng.
+Mở rộng theo chiều ngang(Horizontal scaling): Thêm máy chủ vào nhóm tài nguyên để xử lý nhiều công việc hơn. Điều này giúp hệ thống có thể xử lý nhiều yêu cầu hơn mà không bị quá tải.
+Mở rộng chéo(Diagonal scaling): Là sự kết hợp giữa hai cách mở rộng trên. Đầu tiên là sẽ nâng cấp máy chủ hiện tại đến một cấu hình như ý, sau đó sẽ nhân các máy chủ đó khi nhu cầu tăng. Điều này cho phép bạn xử lý đồng thời nhiều yêu cầu và lưu lượng truy cập.!
+Các máy chủ của WhatsApp vận hành trên hệ điều hành FreeBSD, lựa chọn này được đưa ra dựa trên kinh nghiệm sẵn có từ thời gian các ký sư làm việc tại Yahoo.
+FreeBSD là một hệ điều hành mã nguồn mở dựa trên BSD (Berkeley Software Distribution). Nó nổi tiếng với sự ổn định, bảo mật, và khả năng tùy chỉnh cao, làm cho nó trở thành một lựa chọn phổ biến cho các máy chủ, thiết bị mạng, và các hệ thống có yêu cầu cao về độ tin cậy.
+FreeBSD cung cấp một ngăn xếp mạng (Network stack) mạnh mẽ và ổn định, hỗ trợ xử lý một lượng lớn kết nối đồng thời mà không làm giảm hiệu suất. Điều này rất quan trọng cho một dịch vụ như WhatsApp, nơi hàng triệu người dùng giao tiếp liên tục.
+WhatsApp đã tinh chỉnh FreeBSD để phù hợp với yêu cầu cụ thể của hệ thống. Họ tăng cường khả năng xử lý kết nối bằng cách điều chỉnh các tham số nhân (kernel), như tối ưu hóa quản lý tệp và socket, để hỗ trợ hơn 2 triệu kết nối đồng thời trên mỗi máy chủ. Điều này cho phép WhatsApp mở rộng dịch vụ của mình một cách linh hoạt, đáp ứng nhu cầu ngày càng tăng của người dùng mà không gặp phải vấn đề về hiệu suất.
+Để đảm bảo sự ổn định và sẵn sàng của dịch vụ trong mọi tình huống, WhatsApp cũng áp dụng chiến lược cung cấp tài nguyên dư thừa cho máy chủ. Cách tiếp cận này giúp họ quản lý các đợt tăng đột ngột và giữ cho dịch vụ hoạt động mượt mà ngay cả khi có sự cố phần cứng hoặc lỗi mạng, nhờ vào khả năng quản lý và phân bổ tài nguyên linh hoạt của FreeBSD.
+6. Flywheel Effect
+Flywheel Effect - Hiệu ứng bánh xe đà: Là một phép ẩn dụ mô tả cách mà một quy trình liên tục có thể tạo ra đà và tăng tốc độ theo thời gian. Trong trường hợp này nó ám chỉ việc cải thiện liên tục hiệu suất hệ thống bằng cách đo lường, phân tích, và tinh chỉnh dựa trên dữ liệu.
+WhatsApp tập trung vào việc đo lường các chỉ số quan trọng như tải CPU, context switches (là quá trình chuyển từ việc thực hiện một tác vụ này sang tác vụ khác trong CPU), và system calls (các yêu cầu từ phần mềm đến hệ điều hành). Đo lường này giúp họ xác định và loại bỏ các điểm nghẽn (bottlenecks*)*
