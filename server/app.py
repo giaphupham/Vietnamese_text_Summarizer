@@ -271,6 +271,7 @@ def login():
 @app.route('/logout')
 def log_out():
     session.pop('user', None)
+    session.pop('role', None)
     return redirect(url_for('login'))
 
 @app.route('/resetpassword', methods=['POST'])
