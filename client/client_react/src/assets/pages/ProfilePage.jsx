@@ -136,7 +136,7 @@ function UserProfile(){
               </div>
               <div className='pt-6 pl-6 mx-6 border-l-2 h-min max-h-min'>
                 <p>Account</p>
-                <button className='font-light py-4 font-mono' onClick={openModal}>
+                <button className='font-light pt-4 font-mono border-b-2 border-white hover:border-green-700 hover:text-green-700' onClick={openModal}>
                   Change password
                 </button>
                 <ChangePasswordModal isOpen={isModalOpen} onClose={closeModal} />

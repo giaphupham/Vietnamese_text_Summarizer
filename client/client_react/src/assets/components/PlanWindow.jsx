@@ -4,6 +4,7 @@ import axios from 'axios';
 import PaymentPopUp from './PaymentPopUp';
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
+import HttpClient from "./HttpClient";
 
 // the key is located in the .env file
 const stripePromise = loadStripe('pk_test_51PH03zRtjuoXgTndvOsbkwlA2KxaEXsvXPb7dMx849pchh9jo4ufF6kRAaOuwgpVyJvhh27Rumu1MXP3iZRq0rSF00c43yVrJG');
@@ -14,6 +15,8 @@ const PlanWindow = ({ plan }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [plan_id, setPlanId] = useState(0);
   const [price, setPrice] = useState("");
+  const [planName, setPlanName] = useState("");
+  const [planPrice, setPlanPrice] = useState("");
 
   const handleUpgrade = async (e) => {
     e.preventDefault();
@@ -26,24 +29,15 @@ const PlanWindow = ({ plan }) => {
       console.log('Pro plan selected');
       setPlanId(plan.id)
       setPrice(plan.price_id)
+      setPlanName(plan.name)
+      setPlanPrice(plan.price)
+      
       //navigate('/payment');
       setIsModalOpen(true)
+      
     }
   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-        try {
-            const response = await axios.post('http://127.0.0.1:5000/profile', {
-                withCredentials: true,
-            });
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-        }
-    };
-
-    fetchUserData();
-  }, []);
 
   const close = () => {
     setIsModalOpen(false);
@@ -51,10 +45,12 @@ const PlanWindow = ({ plan }) => {
 
   const sendUpgradeRequest = async (selectedPlan) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
+      const response = await HttpClient.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
+        alert('Upgrade successful');
+        window.location.reload();
         // You can add further actions here if needed
       } else {
         console.error('Failed to send upgrade request');
@@ -74,7 +70,7 @@ const PlanWindow = ({ plan }) => {
           <button className="w-full my-2 bg-[#178733] hover:bg-[#0B6722] text-white font-semibold py-2 px-4 rounded-full" onClick={handleUpgrade}>Upgrade</button>
             )
             }
-          <PaymentPopUp isOpen={isModalOpen}  onClose={close} plan_id={plan_id} price_id={price}/>
+          <PaymentPopUp isOpen={isModalOpen}  onClose={close} plan_id={plan_id} price_id={price} planName={planName} price={planPrice}/>
         
         <div className="plan-details">
           <p><strong>Price:</strong> {plan.price}</p>

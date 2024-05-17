@@ -34,7 +34,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Payment({isOpen, onClose, plan_id, price_id}) {
+function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
   const classes = useStyles();
   const [status, setStatus] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -140,18 +140,24 @@ function Payment({isOpen, onClose, plan_id, price_id}) {
   return (
     
     <div className={`${isOpen ? 'block' : 'hidden'} fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-50 flex items-center justify-center`}>
-        <Card className="w-80">
-        <CardContent className={classes.content}>
-            <CardInput />
-            <div className={classes.div}>
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmitSub}>
-                Subscription
-            </Button>
-            <Button variant="contained" color="secondary" className={classes.button} onClick={onClose}>
-                Close
-            </Button>
-            </div>
-        </CardContent>
+        <Card className="w-96">
+          <CardContent className={classes.content}>
+              <div className='flex flex-col justify-center'>
+                <h2 className="text-2xl mb-4 mx-auto">Payment Infomation</h2>
+                <h3 className="text-xl mb-4">You are subcribe for {planName} plan</h3>
+                <h3 className="text-xl mb-4">Price: {price}/month</h3>
+                <p className="text-sm mb-2">Please enter your payment information below</p>
+              </div>
+              <CardInput />
+              <div className={classes.div}>
+              <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmitSub}>
+                  Subscription
+              </Button>
+              <Button variant="contained" color="secondary" className={classes.button} onClick={onClose}>
+                  Close
+              </Button>
+              </div>
+          </CardContent>
         </Card>
     </div>
   );
