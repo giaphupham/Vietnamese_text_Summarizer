@@ -5,6 +5,8 @@ import ConfirmEmailPage from "./ConfirmEmailPage";
 import UserProfile from "./ProfilePage";
 import AdminPage from "./AdminPage";
 import SubscriptionPage from "./SubscriptionPage";
+import test from "./test";
+
 
 export default [
     HomePage,
@@ -14,4 +16,5 @@ export default [
     UserProfile,
     AdminPage,
     SubscriptionPage,
+    test,
 ]

@@ -13,6 +13,8 @@ import smtplib
 import secrets
 import base64
 import os
+import stripe
+import json
 
 import anthropic
 from model.summary import Summarizer
@@ -59,6 +61,21 @@ client = anthropic.Anthropic(
     api_key="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",
 )
 
+user_info = {}
+
+stripe_keys = {
+    "secret_key": "sk_test_51PH03zRtjuoXgTndUdXLHWaUYUehy3JPC6iNWUbFG0Fr5fIDt6PZ8aQ8LSB52WThZYK7bVyquEH1kCVLJkEXc6ht00YoBVMKBe",
+    "publishable_key": "sk_test_51PH03zRtjuoXgTndUdXLHWaUYUehy3JPC6iNWUbFG0Fr5fIDt6PZ8aQ8LSB52WThZYK7bVyquEH1kCVLJkEXc6ht00YoBVMKBe",
+    "pro_plan_id" : "price_1PH4H2RtjuoXgTndyQUnP94v"
+}
+
+endpoint_secret = 'whsec_71999dae1a449143ed5d672ad61f020236431f5d89eefe7f786d7e3a4767ef51'
+stripe.api_key = stripe_keys["secret_key"]
+
+
+YOUR_DOMAIN = 'http://127.0.0.1:5000'
+
+
 CORS(app, supports_credentials=True)
 bcrypt = Bcrypt(app)
 
@@ -79,6 +96,97 @@ def admin_required(f):
             return jsonify(message="Admins only!"), 403
         return f(*args, **kwargs)
     return decorated_function
+
+@app.route('/pay', methods=['POST'])
+def pay():
+    try:
+        email = request.json.get('email', None)
+
+        if not email:
+            return 'You need to send an Email!', 400
+
+        intent = stripe.PaymentIntent.create(
+            amount=50000,
+            currency='usd',
+            receipt_email=email
+        )
+
+        return {"client_secret": intent['client_secret']}, 200
+    except AttributeError:
+        return 'Provide an Email and Password in JSON format in the request body', 400
+
+
+@app.route('/sub', methods=['POST'])
+def sub():
+    email = request.json.get('email', None)
+    payment_method = request.json.get('payment_method', None)
+
+    if not email:
+        return 'You need to send an Email!', 400
+    if not payment_method:
+        return 'You need to send an payment_method!', 400
+
+    # This creates a new Customer and attaches the default PaymentMethod in one API call.
+    customer = stripe.Customer.create(
+        payment_method=payment_method,
+        email=email,
+        invoice_settings={
+            'default_payment_method': payment_method,
+        },
+    )
+    # Creates a subscription and attaches the customer to it
+    subscription = stripe.Subscription.create(
+        customer=customer['id'],
+        items=[
+            {
+            'price': 'price_1PH4H2RtjuoXgTndyQUnP94v',
+            },
+        ],
+        expand=['latest_invoice.payment_intent'],
+    )
+
+    status = subscription['latest_invoice']['payment_intent']['status'] 
+    client_secret = subscription['latest_invoice']['payment_intent']['client_secret']
+
+    user_info['customer_id'] = customer['id']
+    user_info['email'] = email
+    
+    return {'status': status, 'client_secret': client_secret}, 200
+
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    payload = request.get_data()
+    sig_header = request.headers.get('Stripe_Signature', None)
+
+    if not sig_header:
+        return 'No Signature Header!', 400
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return 'Invalid signature', 400
+
+    if event['type'] == 'payment_intent.succeeded':
+        email = event['data']['object']['receipt_email'] # contains the email that will recive the recipt for the payment (users email usually)
+        
+        user_info['paid_50'] = True
+        user_info['email'] = email
+    if event['type'] == 'invoice.payment_succeeded':
+        email = event['data']['object']['customer_email'] # contains the email that will recive the recipt for the payment (users email usually)
+        customer_id = event['data']['object']['customer'] # contains the customer id
+        
+        user_info['paid'] = True
+    else:
+        return 'Unexpected event type', 400
+
+    return '', 200
 
 @app.route('/summarize-long', methods=['POST'])
 @login_required
@@ -473,4 +581,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=True)
+    app.run(debug=False)
