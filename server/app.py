@@ -489,7 +489,7 @@ def profile():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/feedback', methods=['POST'])
+@app.route('/feedback', methods=['POST','GET'])
 @login_required
 def feedback():
     try:

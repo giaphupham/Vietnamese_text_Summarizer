@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactStars from "react-rating-stars-component";
 import axios from 'axios';
+import HttpClient from './HttpClient';
 
 const FeedbackWindow = ({ onClose }) => {
   const [feedback, setFeedback] = useState('');
@@ -13,12 +14,13 @@ const FeedbackWindow = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('http://127.0.0.1:5000/feedback', {
+    await HttpClient.post('http://127.0.0.1:5000/feedback', {
       
       'comment': feedback,
       'star': rating,
     }).then(response => {
       console.log(response.data);
+      alert('Feedback submitted successfully');
       onClose();
     }).catch(error => {
       console.log(error);
