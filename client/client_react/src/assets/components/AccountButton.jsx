@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGem} from '@fortawesome/free-regular-svg-icons'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import HttpClient from './HttpClient';
 
 
 const AccountButton = () => {
@@ -19,8 +20,7 @@ const AccountButton = () => {
   const handleLogout = () => {
     // Perform logout logic here
     // You can use axios to call your logout endpoint
-    axios.get('http://127.0.0.1:5000//logout',{
-      withCredentials: true
+    HttpClient.get('http://127.0.0.1:5000//logout',{
     }) // Ensure that cookies are sent along with the request
       .then(response => {
         if (response.status === 200) {
@@ -81,7 +81,7 @@ const AccountButton = () => {
         </div>
       )}
       </button>
-      <ToastContainer />
+      <ToastContainer containerId={'containerA'}/>
       </div>
 
       
