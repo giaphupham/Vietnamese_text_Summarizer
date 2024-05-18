@@ -217,7 +217,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         </div>
       </div>
       {showFeedback && <FeedbackWindow onClose={Close} />}
-      <ToastContainer containerId={'containerA'}/>
+      <ToastContainer />
     </div>
   );
 };

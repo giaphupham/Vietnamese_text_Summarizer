@@ -220,8 +220,12 @@ def summerize_long():
 
     if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
-    elif session.get('logged_in', True) and session['summary_count'] >= (MAX_FREE_SUMMARIES + 5):
-        return jsonify({'error': 'Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
+        return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
+        return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
+
+    
 
     data = request.json
     input_text = data.get('input-text')
@@ -276,8 +280,8 @@ def summerize_short():
             session['summary_count'] = 0
             session['last_summary_time'] = current_time
 
-    if not session.get('logged_in', False) and session['summary_count'] > MAX_FREE_SUMMARIES:
-        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+    if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please Login or Register.'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
         return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
@@ -419,7 +423,7 @@ def login():
                     session['user'] = username
                     session['role'] = role
                     session['logged_in'] = True
-                    session['summary_count'] = 3
+                    session['summary_count'] = 0
                     session['subscription'] = subscription
                     return redirect(url_for('home'))
                 else:
