@@ -8,6 +8,7 @@ from model.abstract_model import summarizer
 from supabase import create_client, Client
 from email.message import EmailMessage
 from functools import wraps
+from concurrent.futures import ThreadPoolExecutor
 import ssl
 import smtplib
 import secrets
@@ -18,6 +19,7 @@ import json
 import datetime
 from datetime import timedelta
 import time
+
 
 import anthropic
 from model.summary import Summarizer
@@ -98,6 +100,15 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'role' not in session or session['role'] != 'admin':
             return jsonify(message="Admins only!"), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+def update_last_access(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return f(*args, **kwargs)
+        supabase.table('user').update({'last_access': 'now()'}).eq('email', session.get('user')).execute()
         return f(*args, **kwargs)
     return decorated_function
 
@@ -203,6 +214,7 @@ def user_status():
 MAX_FREE_SUMMARIES = 3
 
 @app.route('/summarize-long', methods=['POST'])
+@update_last_access
 def summerize_long():
     ts = time.time()
     current_time = datetime.datetime.fromtimestamp(ts, tz=None)
@@ -259,6 +271,7 @@ def summerize_long():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/summarize-short', methods=['POST'])
+@update_last_access
 def summerize_short():
     ts = time.time()
     current_time = datetime.datetime.fromtimestamp(ts, tz=None)
@@ -312,7 +325,76 @@ def summerize_short():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/summarize-number', methods=['POST'])
+@update_last_access
+def summarize_number():
+    ts = time.time()
+    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
+    if not request.json:
+        return jsonify({'error': 'No JSON data received'}), 400
+    
+    if 'summary_count' not in session:
+        session['summary_count'] = 0
+        session['last_summary_time'] = current_time
+    else:
+        last_summary_time = session.get('last_summary_time', current_time)
+        if current_time - last_summary_time >= datetime.timedelta(days=1):
+            session['summary_count'] = 0
+            session['last_summary_time'] = current_time
+
+    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+    
+    data = request.json
+    input_text = data.get('input-text')
+    output_sentences = data.get('output-sentences')
+    words_amount = len(input_text.split())
+
+    username = session.get('user')
+
+    try:
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+                
+        max_words = 1500
+        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
+            max_words = 3000
+
+        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
+            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+
+        # Chia đoạn văn bản input thành các đoạn nhỏ tương ứng với số lượng câu muốn output
+        input_sentences = input_text.split('. ')
+        chunk_size = max(1, len(input_sentences) // output_sentences)
+        input_chunks = ['. '.join(input_sentences[i:i + chunk_size]) for i in range(0, len(input_sentences), chunk_size)]
+
+        def summarize_chunk(chunk):
+            return summarizer(chunk)
+
+        # Sử dụng ThreadPoolExecutor để thực hiện đa luồng
+        with ThreadPoolExecutor() as executor:
+            future_to_chunk = {executor.submit(summarize_chunk, chunk): chunk for chunk in input_chunks}
+            summarized_chunks = [future.result() for future in future_to_chunk]
+
+        output_text = ' '.join(summarized_chunks)
+
+        output_words = len(output_text.split())
+        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
+
+        session['summary_count'] += 1
+        session['last_summary_time'] = current_time
+
+        return jsonify({
+            'message': 'Input text received successfully',
+            'output-text': output_text,
+            'words': output_words,
+            'sentences': output_sentences,
+            'max-words': max_words
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/summarize-claude', methods=['POST'])
+@update_last_access
 @login_required
 def summerize_claude():
     if not request.json:
@@ -365,6 +447,7 @@ def summerize_claude():
 @app.route('/')
 @app.route('/home')
 @login_required
+@update_last_access
 def home():
     return jsonify({'message': 'At home: Logged in successfully'}), 200
 
@@ -388,6 +471,7 @@ def register():
             return jsonify({'error': str(e)}), 500
   
 @app.route('/login', methods=['POST', 'GET'])
+@update_last_access
 def login():
     
     if request.method == 'POST':
@@ -403,7 +487,7 @@ def login():
             if username and password:
                 # get user from database !!!
                 dtb_result = supabase.table('user').select('password', 'role').eq('email', username).execute()
-                
+
                 dtb_hased_password = dtb_result.data[0]["password"] # get the password from the tuple and remove the (' and ',)
                 role = dtb_result.data[0]["role"] 
 
@@ -428,6 +512,7 @@ def login():
     
 
 @app.route('/logout')
+@update_last_access
 def log_out():
     session.pop('user', None)
     session.pop('role', None)
@@ -512,11 +597,15 @@ def save_text():
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved successfully"}), 200
 
-@app.route('/admin', methods=['GET'])
+@app.route('/admin_get_users', methods=['GET'])
 @login_required
 @admin_required
-def admin():
-    return jsonify(message="Welcome, admin!"), 200
+def admin_get_users():
+    try:
+        users = supabase.table('users').select('*').execute()
+        return jsonify(users.data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/profile', methods=['POST', 'GET'])
