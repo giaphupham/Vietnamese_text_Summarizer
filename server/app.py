@@ -600,12 +600,45 @@ def save_text():
 @app.route('/admin_get_users', methods=['GET'])
 @login_required
 @admin_required
+@update_last_access
 def admin_get_users():
     try:
-        users = supabase.table('users').select('*').execute()
+        users = (supabase
+                .table('user')
+                .select('*')
+                .order('last_access', desc=True)
+                .limit(50)
+                .execute())
         return jsonify(users.data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/admin_report_sales', methods=['GET'])
+@login_required
+@admin_required
+@update_last_access
+def admin_report_sales():
+    try:
+        # Đếm số người dùng loại 1
+        response_1 = supabase.table('user').select('id', count='exact').eq('subscription',1).execute()
+        count_type_1 = response_1.count
+
+        response_2 = supabase.table('user').select('id', count='exact').eq('subscription',2).execute()
+        count_type_2 = response_2.count
+
+        revenue_pro = count_type_1 * 0.99
+        revenue_premium = count_type_2 * 9.99
+
+        return jsonify({
+            "count_type_1": count_type_1,
+            "count_type_2": count_type_2,
+            "revenue_pro": revenue_pro,
+            "revenue_premium": revenue_premium,
+            "revenue_total": revenue_pro+revenue_premium
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/profile', methods=['POST', 'GET'])
