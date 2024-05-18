@@ -57,7 +57,7 @@ function LoginPage() {
   const responseFacebook = async (res) => {
 
     setLoading(true);
-
+    console.log(res);
     await HttpClient.post("http://127.0.0.1:5000/login_by_acc", {      
         email: res.email,
         name: res.name,
@@ -122,13 +122,14 @@ function LoginPage() {
             <div className="flex flex-col mb-6 justify-center">
               <div className="mb-4">
                 <FacebookLogin
-                  appId="414388071398115"
-                  fields="name,email"
+                  appId="7945089925544136"
                   callback={responseFacebook}
+                  fields="name,email"
                   autoLoad={false}
                   textButton="Continue with Facebook"
                   cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
                   access_token={responseFacebook}
+                  scope={['email']}
                 />
               </div>
               <div className="w-full">

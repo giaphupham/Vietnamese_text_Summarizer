@@ -15,6 +15,9 @@ import base64
 import os
 import stripe
 import json
+import datetime
+from datetime import timedelta
+import time
 
 import anthropic
 from model.summary import Summarizer
@@ -192,11 +195,32 @@ def webhook():
 
     return '', 200
 
+@app.route('/status', methods=['GET'])
+def user_status():
+    user_logged_in = session.get('logged_in', False)
+    return jsonify({'loggedIn': user_logged_in})
+
+MAX_FREE_SUMMARIES = 3
+
 @app.route('/summarize-long', methods=['POST'])
 def summerize_long():
+    ts = time.time()
+    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
     
+    if 'summary_count' not in session:
+        session['summary_count'] = 0
+        session['last_summary_time'] = current_time
+    else:
+        last_summary_time = session.get('last_summary_time', current_time)
+        if current_time - last_summary_time >= timedelta(days=1):
+            session['summary_count'] = 0
+            session['last_summary_time'] = current_time
+
+    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
@@ -205,11 +229,11 @@ def summerize_long():
     username = session.get('user')
     
     try:
-        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()               
-        print("sub status: ",dtb_result, type(dtb_result))        
-        subscription = dtb_result.data[0]["subscription"]
+        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()    
+        print(dtb_result.data)                   
+        
 
-        if(words_amount > 1500 and (subscription==0 or subscription==[])):
+        if(words_amount > 1500 and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
@@ -221,6 +245,9 @@ def summerize_long():
         output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
         + output_text.count(':') - 2* output_text.count('...')
 
+        session['summary_count'] += 1
+        session['last_summary_time'] = current_time
+        print(session)
         return jsonify({
             'message': 'Input text received successfully',
             'output-text': output_text,
@@ -233,8 +260,22 @@ def summerize_long():
 
 @app.route('/summarize-short', methods=['POST'])
 def summerize_short():
+    ts = time.time()
+    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
+    
+    if 'summary_count' not in session:
+        session['summary_count'] = 0
+        session['last_summary_time'] = current_time
+    else:
+        last_summary_time = session.get('last_summary_time', current_time)
+        if current_time - last_summary_time >= timedelta(days=1):
+            session['summary_count'] = 0
+            session['last_summary_time'] = current_time
+
+    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
     
     print(session.get('user'))
     data = request.json
@@ -246,14 +287,12 @@ def summerize_short():
     try:
         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
                 
-        subscription = dtb_result.data[0]["subscription"]
-        
+
         max_words = 1500
-        if(subscription != 0 and subscription != []):
+        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
             max_words = 3000
 
-
-        if(words_amount > max_words and (subscription==0 or subscription==[])):
+        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
         output_text = summarizer(input_text)
@@ -261,6 +300,8 @@ def summerize_short():
         output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
         + output_text.count(':') - 2* output_text.count('...')
 
+        session['summary_count'] += 1
+        session['last_summary_time'] = current_time
         return jsonify({
             'message': 'Input text received successfully',
             'output-text': output_text,
@@ -370,6 +411,8 @@ def login():
                     session.permanent = True
                     session['user'] = username
                     session['role'] = role
+                    session['logged_in'] = True
+                    session['summary_count'] = 0
                     print("session " + session['user'])
                     return redirect(url_for('home'))
                 else:

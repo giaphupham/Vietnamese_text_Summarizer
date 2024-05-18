@@ -8,6 +8,7 @@ import axios from "axios";
 function MainField() {
   const [summarizeType, setSummarizeType] = useState('short');
   const [showFeedback, setShowFeedback] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const handleFeedbackClick = () => {
     setShowFeedback(true);
@@ -31,6 +32,13 @@ function MainField() {
 //             // Redirect to login page
 //         });
 // },[]);
+  // useEffect(() => {
+  //   // Fetch user login status from the backend or session
+  //   axios.get('http://127.0.0.1:5000/status')
+  //     .then(response => setLoggedIn(response.data.loggedIn))
+  //     .catch(error => console.error(error));
+  // }, []);
+
   return (
     <div className="flex flex-col max-w-6xl mx-auto mt-20 border rounded-xl shadow-md">
         <ControlBar setSummarizeType={setSummarizeType} onClick={handleFeedbackClick}/>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import FileInput from './FileInput';
 import axios from 'axios';
 import copy from 'clipboard-copy';
@@ -20,6 +20,9 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [words, setWords] = useState(0);
   const [maxWords, setMaxWords] = useState(1500);
   const textAreaRef = useRef();
+  const [loggedIn, setLoggedIn] = useState(false); // Check user login status
+  const maxFreeSummaries = 3;
+  const [summaryCount, setSummaryCount] = useState(0);
 
   const handleCopyClick = () => {
     if (textAreaRef.current) {
@@ -62,7 +65,19 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
     return inputText.trim() === '';
   };
 
+  useEffect(() => {
+    // Fetch user login status from the backend or session
+    axios.get('http://127.0.0.1:5000/status')
+      .then(response => setLoggedIn(response.data.loggedIn))
+      .catch(error => console.error(error));
+  }, []);
+
   const handleSummarize = async () => {
+      if (!loggedIn && summaryCount >= maxFreeSummaries) {
+        toast.error('You have reached the maximum number of free summaries. Please log in to continue.', {autoClose: 3000});
+        return;
+      }
+
       const apiUrl = summarizeType === 'short' ? 'http://127.0.0.1:5000/summarize-short' : 'http://127.0.0.1:5000/summarize-long';
 
       setLoading(true);
@@ -78,10 +93,11 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         setSentences(data['sentences']);
         setWords(data['words']);
         setMaxWords(data['max-words']);
+        setSummaryCount(prevCount => prevCount + 1);
       })
       .catch(error => {
-        console.log('catch ' + error)
-        toast.error('Summarization failed! Please try again', {autoClose: 3000});
+        console.log('catch ' + error.response.data.error)
+        toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
       });
 
