@@ -17,20 +17,20 @@ function MainField() {
     setShowFeedback(false);
   };
 
-  useEffect(() => {
-    axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
-        .then(response => {
-            if (response.status === 200) {
-                console.log(response.data.message);
-            } else {
-                throw new Error('You have to log in first');
-            }
-        })
-        .catch(error => {
-            console.error(error);
-            // Redirect to login page
-        });
-},[]);
+//   useEffect(() => {
+//     axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+//         .then(response => {
+//             if (response.status === 200) {
+//                 console.log(response.data.message);
+//             } else {
+//                 throw new Error('You have to log in first');
+//             }
+//         })
+//         .catch(error => {
+//             console.error(error);
+//             // Redirect to login page
+//         });
+// },[]);
   return (
     <div className="flex flex-col max-w-6xl mx-auto mt-20 border rounded-xl shadow-md">
         <ControlBar setSummarizeType={setSummarizeType} onClick={handleFeedbackClick}/>

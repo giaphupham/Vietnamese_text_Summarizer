@@ -63,7 +63,7 @@ function RegisterPage() {
     <div>
         <NavBar isLogin={false}/>
         <RegisterForm onSubmit={handleRegister} load={loading} />
-        <ToastContainer />
+        <ToastContainer containerId="containerA"/>
     </div>
 
 

@@ -19,7 +19,16 @@ const NavBar = ({isLogin = true}) => {
           </div>
 
             
-            {isLogin === true && (<AccountButton />)}
+            {isLogin === true ? (<AccountButton />) : 
+            (<div className='flex flex-wrap content-center items-center'>
+              <button>
+                <a href="/Login" className="text-white font-semibold bg-[#178733] py-2 px-4 rounded-full hover:bg-[#0B6722]">Login</a>
+              </button>
+              <p className='mx-2 font-medium'>or</p>
+              <button>
+                <a href="/Register" className="text-white font-semibold bg-[#178733] py-2 px-4 rounded-full hover:bg-[#0B6722]">Register</a>
+              </button>
+            </div>)}
 
           </div>
       </nav>

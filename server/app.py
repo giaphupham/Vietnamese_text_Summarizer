@@ -193,7 +193,6 @@ def webhook():
     return '', 200
 
 @app.route('/summarize-long', methods=['POST'])
-@login_required
 def summerize_long():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -210,7 +209,7 @@ def summerize_long():
         print("sub status: ",dtb_result, type(dtb_result))        
         subscription = dtb_result.data[0]["subscription"]
 
-        if(words_amount > 1500 and subscription==0):
+        if(words_amount > 1500 and (subscription==0 or subscription==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
@@ -233,7 +232,6 @@ def summerize_long():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/summarize-short', methods=['POST'])
-@login_required
 def summerize_short():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -249,8 +247,13 @@ def summerize_short():
         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
                 
         subscription = dtb_result.data[0]["subscription"]
+        
+        max_words = 1500
+        if(subscription != 0 and subscription != []):
+            max_words = 3000
 
-        if(words_amount > 1500 and subscription==0):
+
+        if(words_amount > max_words and (subscription==0 or subscription==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
         output_text = summarizer(input_text)
@@ -262,7 +265,8 @@ def summerize_short():
             'message': 'Input text received successfully',
             'output-text': output_text,
             'words': output_words,
-            'sentences': output_sentences
+            'sentences': output_sentences,
+            'max-words': max_words
             }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -287,7 +291,7 @@ def summerize_claude():
                 
         subscription = dtb_result.data[0]["subscription"]
 
-        if(subscription != 2):
+        if(subscription != 0):
             return jsonify({'error': 'Only level 2 subscription user can summarize using this tool'}), 403
         
 

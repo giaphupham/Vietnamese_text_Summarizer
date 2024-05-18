@@ -18,6 +18,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [loading, setLoading] = useState(false);
   const [sentences, setSentences] = useState(0);
   const [words, setWords] = useState(0);
+  const [maxWords, setMaxWords] = useState(1500);
   const textAreaRef = useRef();
 
   const handleCopyClick = () => {
@@ -76,6 +77,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         setOutputText(data['output-text']);
         setSentences(data['sentences']);
         setWords(data['words']);
+        setMaxWords(data['max-words']);
       })
       .catch(error => {
         console.log('catch ' + error)
@@ -129,7 +131,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         <div className='flex justify-between'>
           {isTextareaEmpty() ? (
             <FileInput />
-          ) : (<p className='p-4'>{countWords()} words</p>
+          ) : (<p className='p-4'>{countWords()} words / {maxWords} words</p>
           )}
           <button
           className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full my-2 mx-6 w-40"

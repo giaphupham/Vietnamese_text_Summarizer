@@ -2,19 +2,21 @@ import React from "react";
 import NavBar from "../components/NavBar";
 import MainField from "../components/MainField";
 import axios from "axios";
-import { useEffect} from "react";
+import { useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Ads from "../components/Ads";
 
 function HomePage() {
   const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
         axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
             .then(response => {
                 if (response.status === 200) {
                     console.log(response.data.message);
+                    setIsLogin(true);
                 } else {
                     throw new Error('You have to log in first');
                 }
@@ -22,12 +24,13 @@ function HomePage() {
             .catch(error => {
                 console.error(error);
                 // Redirect to login page
-                navigate('/Login');
+                setIsLogin(false);
             });
     },[]);
+
   return (
     <div>
-          <NavBar />
+          <NavBar isLogin={isLogin}/>
           <MainField />
           <Ads />
           <Footer />

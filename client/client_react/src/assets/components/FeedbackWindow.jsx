@@ -14,6 +14,8 @@ const FeedbackWindow = ({ onClose }) => {
     console.log(rating);
   };
 
+  const user = localStorage.getItem('email');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await HttpClient.post('http://127.0.0.1:5000/feedback', {
@@ -26,9 +28,12 @@ const FeedbackWindow = ({ onClose }) => {
       onClose();
     }).catch(error => {
       console.log(error);
-    });
-
-
+      if (user == null) {
+        toast.error('Please log in first', {autoClose: 3000});
+      } else {
+        toast.error('Failed to submit feedback, please try later', {autoClose: 3000});
+      }
+    });x
   };
 
 
