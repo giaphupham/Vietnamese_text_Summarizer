@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import InputAndOutput from "./InputAndOuput";
 import ControlBar from "./ControlBar";
 import axios from "axios";
+import HttpClient from "./HttpClient";
 
 
 function MainField() {
@@ -19,7 +20,7 @@ function MainField() {
   };
 
 //   useEffect(() => {
-//     axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+//     HttpClient.get('http://127.0.0.1:5000/home', { withCredentials: true })
 //         .then(response => {
 //             if (response.status === 200) {
 //                 console.log(response.data.message);

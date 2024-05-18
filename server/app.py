@@ -89,7 +89,7 @@ MAX_FILE_SIZE = 5 * 1024 * 1024
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        print("session: ", session.get('user'))
+        print("session: ", session)
         if 'user' not in session:
             return redirect(url_for('login')), 401
         return f(*args, **kwargs)
@@ -208,7 +208,7 @@ def webhook():
 
 @app.route('/status', methods=['GET'])
 def user_status():
-    user_logged_in = session.get('logged_in', False)
+    user_logged_in = session.get('logged_in')
     return jsonify({'loggedIn': user_logged_in})
 
 MAX_FREE_SUMMARIES = 3
@@ -230,8 +230,14 @@ def summerize_long():
             session['summary_count'] = 0
             session['last_summary_time'] = current_time
 
-    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+    if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
+        return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
+        return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
+
+    
 
     data = request.json
     input_text = data.get('input-text')
@@ -287,8 +293,12 @@ def summerize_short():
             session['summary_count'] = 0
             session['last_summary_time'] = current_time
 
-    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+    if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please Login or Register.'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
+        return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
+        return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
     
     print(session.get('user'))
     data = request.json
@@ -482,22 +492,23 @@ def login():
         data = request.json
         username = data.get('username')
         password = data.get('password')
-        
+
         try:
             if username and password:
                 # get user from database !!!
-                dtb_result = supabase.table('user').select('password', 'role').eq('email', username).execute()
+                dtb_result = supabase.table('user').select('password', 'role', 'subscription').eq('email', username).execute()
 
                 dtb_hased_password = dtb_result.data[0]["password"] # get the password from the tuple and remove the (' and ',)
                 role = dtb_result.data[0]["role"] 
-
+                subscription = dtb_result.data[0]["subscription"]
+                
                 if bcrypt.check_password_hash(dtb_hased_password, password):
                     session.permanent = True
                     session['user'] = username
                     session['role'] = role
                     session['logged_in'] = True
                     session['summary_count'] = 0
-                    print("session " + session['user'])
+                    session['subscription'] = subscription
                     return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
@@ -516,6 +527,8 @@ def login():
 def log_out():
     session.pop('user', None)
     session.pop('role', None)
+    session.pop('logged_in', None)
+    session.pop('subscription', None)
     return redirect(url_for('login'))
 
 @app.route('/resetpassword', methods=['POST'])
@@ -729,16 +742,26 @@ def login_and_register_by_3rd_party():
     email = data.get('email')
     name = data.get('name')
 
-    user_email = supabase.table('user').select('email').eq('email', email).execute()
-
-    if user_email.data == []:
+    user_ = supabase.table('user').select('email','role', 'subscription').eq('email', email).execute()
+    role = user_.data[0]["role"]
+    user_email = user_.data[0]["email"]
+    subscription = user_.data[0]["subscription"]
+    if user_email == []:
         supabase.table('user').insert({"email": email, "password": "null", "name": name}).execute()
         session.permanent = True
         session['user'] = email
+        session['role'] = role
+        session['logged_in'] = True
+        session['summary_count'] = 3
+
         return redirect(url_for('home'))
     else:
         session.permanent = True
         session['user'] = email
+        session['role'] = role
+        session['logged_in'] = True
+        session['summary_count'] = 3
+        session['subscription'] = subscription
         return redirect(url_for('home'))
 
 @app.route('/change_password', methods=['POST'])

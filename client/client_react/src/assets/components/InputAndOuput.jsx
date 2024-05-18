@@ -67,8 +67,8 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
 
   useEffect(() => {
     // Fetch user login status from the backend or session
-    axios.get('http://127.0.0.1:5000/status')
-      .then(response => setLoggedIn(response.data.loggedIn))
+    HttpClient.get('http://127.0.0.1:5000/status')
+      .then(response => setLoggedIn(response.data['loggedIn']))
       .catch(error => console.error(error));
   }, []);
 

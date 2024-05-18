@@ -47,7 +47,7 @@ function LoginPage() {
       navigate({ pathname: '/' })
     })
     .catch(error => {
-      console.log('catch ' + error)
+      console.log('catch ' + error.response.data.error)
       toast.error('Login failed! Check your email and password again', {autoClose: 3000});
       setLoading(false);
     });
@@ -86,7 +86,7 @@ function LoginPage() {
       navigate({ pathname: '/' })
     }).catch(error => {
       console.log('catch ' + error)
-      toast.error('Login failed! Please try again', {autoClose: 3000});
+      toast.error(error.response.data.error, {autoClose: 3000});
       setLoading(false);
     });
   };
