@@ -618,7 +618,7 @@ def admin_get_users():
     try:
         users = (supabase
                 .table('user')
-                .select('*')
+                .select('id','email','name','role','subscription','created_at',"last_access")
                 .order('last_access', desc=True)
                 .limit(50)
                 .execute())
@@ -632,7 +632,6 @@ def admin_get_users():
 @update_last_access
 def admin_report_sales():
     try:
-        # Đếm số người dùng loại 1
         response_1 = supabase.table('user').select('id', count='exact').eq('subscription',1).execute()
         count_type_1 = response_1.count
 
@@ -652,7 +651,24 @@ def admin_report_sales():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/admin_approve_admin', methods=['POST'])
+@login_required
+@admin_required
+@update_last_access
+def admin_approve_admin():
+    try:
+        data = request.get_json()
+        username = data.get('username')
 
+        if not username:
+            return jsonify({"error": "Missing username"}), 400
+        
+        supabase.table('user').update({'role': 'admin'}).eq('email', username).execute()
+
+        return jsonify({"message": "User role updated to admin successfully"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
