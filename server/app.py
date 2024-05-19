@@ -9,6 +9,7 @@ from supabase import create_client, Client
 from email.message import EmailMessage
 from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
+from nltk.tokenize import sent_tokenize
 import ssl
 import smtplib
 import secrets
@@ -233,16 +234,17 @@ def summerize_long():
     if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
-        return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+        return jsonify({'error': 'Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
         return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
-
-    
 
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
     output_sentences = round(data.get('sentences') / 2)
+
+    if not input_text or not output_sentences:
+        return jsonify({'error': 'Missing input text or number of sentences'}), 400
 
     username = session.get('user')
     
@@ -305,6 +307,9 @@ def summerize_short():
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
 
+    if not input_text:
+        return jsonify({'error': 'Missing input text'}), 400
+
     username = session.get('user')
 
     try:
@@ -357,8 +362,11 @@ def summarize_number():
     
     data = request.json
     input_text = data.get('input-text')
-    output_sentences = data.get('output-sentences')
+    output_sentences = data.get('sentences')
     words_amount = len(input_text.split())
+
+    if not input_text or not output_sentences:
+        return jsonify({'error': 'Missing input text or number of sentences'}), 400
 
     username = session.get('user')
 
@@ -372,23 +380,28 @@ def summarize_number():
         if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
-        # Chia đoạn văn bản input thành các đoạn nhỏ tương ứng với số lượng câu muốn output
-        input_sentences = input_text.split('. ')
-        chunk_size = max(1, len(input_sentences) // output_sentences)
-        input_chunks = ['. '.join(input_sentences[i:i + chunk_size]) for i in range(0, len(input_sentences), chunk_size)]
+        print("flag1")
+        # Chia đoạn input thành các đoạn nhỏ
+        input_chunks = sent_tokenize(input_text) # array các câu
+        chunk_size = len(input_chunks) // output_sentences # số câu mỗi đoạn
+        
+        # Tạo các đoạn input_segments tương ứng với số lượng output_sentences
+        input_segments = [' '.join(input_chunks[i * chunk_size: (i + 1) * chunk_size]) 
+                          for i in range(output_sentences)]
+        
+        if len(input_segments) < output_sentences:
+            input_segments.append(' '.join(input_chunks[output_sentences * chunk_size:]))
+        
+        print(input_segments)
 
-        def summarize_chunk(chunk):
-            return summarizer(chunk)
-
-        # Sử dụng ThreadPoolExecutor để thực hiện đa luồng
-        with ThreadPoolExecutor() as executor:
-            future_to_chunk = {executor.submit(summarize_chunk, chunk): chunk for chunk in input_chunks}
-            summarized_chunks = [future.result() for future in future_to_chunk]
-
-        output_text = ' '.join(summarized_chunks)
+        with ThreadPoolExecutor(max_workers=output_sentences) as executor:
+            results = list(executor.map(summarizer, input_segments))
+        
+        print(results)
+        output_text = ' '.join(results)
+        print(output_text)
 
         output_words = len(output_text.split())
-        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
 
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
@@ -794,4 +807,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=True)
+    app.run(debug=False, threaded=True)
