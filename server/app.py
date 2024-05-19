@@ -330,8 +330,7 @@ def summerize_short():
 
         output_text = summarizer(input_text)
         output_words = len(output_text.split())
-        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
-        + output_text.count(':') - 2* output_text.count('...')
+        output_sentences = len(sent_tokenize(output_text))
         r, evaluate = load_model()
         score = evaluate.content_based(output_text, input_text)
 
@@ -445,7 +444,7 @@ def summerize_claude():
                 
         subscription = dtb_result.data[0]["subscription"]
 
-        if(subscription != 0):
+        if(subscription != 2):
             return jsonify({'error': 'Only level 2 subscription user can summarize using this tool'}), 403
         
 
@@ -453,15 +452,15 @@ def summerize_claude():
             model="claude-3-haiku-20240307",
             max_tokens=1024,
             messages=[
-                {"role": "user", "content": "Tóm tắt văn bản sau còn khoảng "+str(output_length)+" từ: "+input_text}
+                {"role": "user", "content": "Tóm tắt văn bản sau còn khoảng "+str(output_length)+" từ, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
             ]
         )
         summarizer, evaluate = load_model()
-        output_text = message.content[0].text.split(":\n")[1]
+        print(message.content[0].text)
+        output_text = message.content[0].text
 
         output_words = len(output_text.split())
-        output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
-        + output_text.count(':') - 2* output_text.count('...')
+        output_sentences = len(sent_tokenize(output_text))
 
         score = evaluate.content_based(output_text, input_text)
 
