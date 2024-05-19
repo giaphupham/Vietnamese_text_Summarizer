@@ -253,7 +253,11 @@ def summerize_long():
         print(dtb_result.data)                   
         
 
-        if(words_amount > 1500 and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
+        max_words = 1500
+        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
+            max_words = 3000
+
+        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
@@ -273,7 +277,8 @@ def summerize_long():
             'output-text': output_text,
             'words': output_words,
             'sentences': output_sentences,
-            'score': score
+            'max-words': max_words,
+            'score': round(score * 100)
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -327,6 +332,8 @@ def summerize_short():
         output_words = len(output_text.split())
         output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
         + output_text.count(':') - 2* output_text.count('...')
+        r, evaluate = load_model()
+        score = evaluate.content_based(output_text, input_text)
 
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
@@ -335,7 +342,8 @@ def summerize_short():
             'output-text': output_text,
             'words': output_words,
             'sentences': output_sentences,
-            'max-words': max_words
+            'max-words': max_words,
+            'score': round(score * 100)
             }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
