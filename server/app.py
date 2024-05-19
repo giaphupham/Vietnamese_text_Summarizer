@@ -432,11 +432,13 @@ def summerize_claude():
     
     data = request.json
     input_text = data.get('input-text')
-    percent = data.get('percent')
+    sentences = data.get('sentences')
     input_length= len(input_text.split())
-    output_length = int(input_length * percent / 100)
 
     username = session.get('user')
+
+    if(sentences>= len(sent_tokenize(input_text))-2):
+        return jsonify({'error':"Amount of output sentences cannot too big >= input sentences -2"})
     
     # handle the response
     try:
@@ -452,11 +454,10 @@ def summerize_claude():
             model="claude-3-haiku-20240307",
             max_tokens=1024,
             messages=[
-                {"role": "user", "content": "Tóm tắt văn bản sau còn khoảng "+str(output_length)+" từ, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
+                {"role": "user", "content": "Tóm tắt văn bản sau còn "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
             ]
         )
         summarizer, evaluate = load_model()
-        print(message.content[0].text)
         output_text = message.content[0].text
 
         output_words = len(output_text.split())
