@@ -25,6 +25,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const maxFreeSummaries = 3;
   const [summaryCount, setSummaryCount] = useState(0);
   const [showPlan, setShowPlan] = useState(false);
+  const [score, setScore] = useState(0);
 
   const handleCopyClick = () => {
     if (textAreaRef.current) {
@@ -96,10 +97,11 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         setWords(data['words']);
         setMaxWords(data['max-words']);
         setSummaryCount(prevCount => prevCount + 1);
+        setScore(data['score']);
       })
       .catch(error => {
         console.log('catch ' + error.response.data.error)
-        toast.error(error.response.data.error, {autoClose: 3000});
+        // toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
         setShowPlan(true);
       });
@@ -181,7 +183,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
           <div
           className="text-black font-medium py-2 px-2 rounded m-2"
           >
-            {sentences} sentences | {words} words
+            {sentences} sentences | {words} words | Score: {score}%
           </div>
           <div className='mx-4 self-center flex items-center'>
           <button
