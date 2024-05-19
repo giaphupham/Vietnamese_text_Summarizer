@@ -10,6 +10,7 @@ import HttpClient from './HttpClient';
 import FeedbackWindow from "./FeedbackWindow";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UpgradePopUp from './UpgradePopUp';
 
 const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [inputText, setInputText] = useState('');
@@ -23,6 +24,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
   const [loggedIn, setLoggedIn] = useState(false); // Check user login status
   const maxFreeSummaries = 3;
   const [summaryCount, setSummaryCount] = useState(0);
+  const [showPlan, setShowPlan] = useState(false);
 
   const handleCopyClick = () => {
     if (textAreaRef.current) {
@@ -99,6 +101,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         console.log('catch ' + error.response.data.error)
         toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
+        setShowPlan(true);
       });
 
   };
@@ -217,6 +220,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         </div>
       </div>
       {showFeedback && <FeedbackWindow onClose={Close} />}
+      <UpgradePopUp show={showPlan} onClose={() => setShowPlan(false)} />
       <ToastContainer />
     </div>
   );
