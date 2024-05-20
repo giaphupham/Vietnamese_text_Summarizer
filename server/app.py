@@ -113,23 +113,42 @@ def update_last_access(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route('/pay', methods=['POST'])
-def pay():
+@app.route('/admin_ban_user', methods=['PUT'])
+@login_required
+@admin_required
+@update_last_access
+def admin_ban_user():
     try:
-        email = request.json.get('email', None)
+        data = request.get_json()
+        user_id = data.get('email')
+        
+        user_response = supabase.table('user').select('role').eq('email', user_id).execute()
+        if not user_response.data or user_response.data[0]['role'] == 'super_admin':
+            return jsonify({"error": "Cannot ban super admin"}), 403
+        
+        response = supabase.table('user').update({"banned": 'Banned'}).eq('email', user_id).execute()
+        return jsonify(response.data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        if not email:
-            return 'You need to send an Email!', 400
-
-        intent = stripe.PaymentIntent.create(
-            amount=50000,
-            currency='usd',
-            receipt_email=email
-        )
-
-        return {"client_secret": intent['client_secret']}, 200
-    except AttributeError:
-        return 'Provide an Email and Password in JSON format in the request body', 400
+@app.route('/admin_unban_user', methods=['PUT'])
+@login_required
+@admin_required
+@update_last_access
+def admin_unban_user():
+    try:
+        data = request.get_json()
+        user_id = data.get('email')
+        
+        # Fetch the user to check their role
+        user_response = supabase.table('user').select('role').eq('email', user_id).execute()
+        if not user_response.data:
+            return jsonify({"error": "User not found"}), 404
+        
+        response = supabase.table('user').update({"banned": 'None'}).eq('email', user_id).execute()
+        return jsonify(response.data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/sub', methods=['POST'])
@@ -243,9 +262,6 @@ def summerize_long():
     words_amount = len(input_text.split())
     output_sentences = round(data.get('sentences') / 2)
 
-    if not input_text or not output_sentences:
-        return jsonify({'error': 'Missing input text or number of sentences'}), 400
-
     username = session.get('user')
     
     try:
@@ -312,9 +328,6 @@ def summerize_short():
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
 
-    if not input_text:
-        return jsonify({'error': 'Missing input text'}), 400
-
     username = session.get('user')
 
     try:
@@ -363,7 +376,6 @@ def summarize_number():
         if current_time - last_summary_time >= datetime.timedelta(days=1):
             session['summary_count'] = 0
             session['last_summary_time'] = current_time
-
     if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
     
@@ -371,22 +383,17 @@ def summarize_number():
     input_text = data.get('input-text')
     output_sentences = data.get('sentences')
     words_amount = len(input_text.split())
-
     if not input_text or not output_sentences:
         return jsonify({'error': 'Missing input text or number of sentences'}), 400
-
     username = session.get('user')
-
     try:
         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
                 
         max_words = 1500
         if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
             max_words = 3000
-
         if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-
         print("flag1")
         # Chia đoạn input thành các đoạn nhỏ
         input_chunks = sent_tokenize(input_text) # array các câu
@@ -400,19 +407,15 @@ def summarize_number():
             input_segments.append(' '.join(input_chunks[output_sentences * chunk_size:]))
         
         print(input_segments)
-
         with ThreadPoolExecutor(max_workers=output_sentences) as executor:
             results = list(executor.map(summarizer, input_segments))
         
         print(results)
         output_text = ' '.join(results)
         print(output_text)
-
         output_words = len(output_text.split())
-
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
-
         return jsonify({
             'message': 'Input text received successfully',
             'output-text': output_text,
@@ -454,7 +457,7 @@ def summerize_claude():
             model="claude-3-haiku-20240307",
             max_tokens=1024,
             messages=[
-                {"role": "user", "content": "Tóm tắt văn bản sau còn "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
+                {"role": "user", "content": "Tóm tắt văn bản sau thành chính xác "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
             ]
         )
         summarizer, evaluate = load_model()
@@ -517,8 +520,11 @@ def login():
         try:
             if username and password:
                 # get user from database !!!
-                dtb_result = supabase.table('user').select('password', 'role', 'subscription').eq('email', username).execute()
+                dtb_result = supabase.table('user').select('password', 'role', 'subscription', 'banned').eq('email', username).execute()
 
+                if dtb_result.data[0]['banned'] == 'Banned':
+                    return jsonify({"error": "This account has been banned"}), 403
+                
                 dtb_hased_password = dtb_result.data[0]["password"] # get the password from the tuple and remove the (' and ',)
                 role = dtb_result.data[0]["role"] 
                 subscription = dtb_result.data[0]["subscription"]
@@ -530,7 +536,11 @@ def login():
                     session['logged_in'] = True
                     session['summary_count'] = 0
                     session['subscription'] = subscription
-                    return redirect(url_for('home'))
+
+                    if role == 'admin':
+                        return jsonify(dtb_result.data[0])
+                    else:
+                        return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
                 
@@ -639,7 +649,7 @@ def admin_get_users():
     try:
         users = (supabase
                 .table('user')
-                .select('id','email','name','role','subscription','created_at',"last_access")
+                .select('id','email','name','role','subscription','created_at',"last_access", "banned")
                 .order('last_access', desc=True)
                 .limit(50)
                 .execute())
@@ -715,8 +725,9 @@ def feedback():
         data = request.json
         star = data.get('star')
         comment = data.get('comment')
+        user = data.get('user')
 
-        supabase.table('feedback').insert({ "star": star, "comment": comment}).execute()
+        supabase.table('feedback').insert({"user":user, "star": star, "comment": comment}).execute()
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -769,7 +780,17 @@ def upgrade_plan():
     data = request.json
     plan = data.get('plan')
     user = data.get('user') 
+
+    user_id = supabase.table('user').select('id').eq('email', user).execute()
     supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
+
+        # Insert data into the subscriptions table
+    supabase.table('subscriptions').insert({
+            'user_id': user_id.data[0]['id'],
+            'payment menthod': 'card',
+            'type':plan,
+        }).execute()
+
 
     return jsonify({'message': 'Plan upgraded successfully'}), 200
 
@@ -815,4 +836,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False, threaded=True)
+    app.run(debug=True, threaded=True)

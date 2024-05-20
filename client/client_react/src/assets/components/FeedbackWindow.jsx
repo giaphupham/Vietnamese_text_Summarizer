@@ -22,6 +22,7 @@ const FeedbackWindow = ({ onClose }) => {
       
       'comment': feedback,
       'star': rating,
+      'user': user,
     }).then(response => {
       console.log(response.data);
       toast.success('Feedback submitted successfully!', {autoClose: 3000});
