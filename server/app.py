@@ -702,6 +702,8 @@ def admin_approve_admin():
         password = data.get('password')
         admin = data.get('admin')
 
+        print(username, password, admin)
+
         if not username or not password:
             return jsonify({"error": "Missing username or password"}), 400
 
