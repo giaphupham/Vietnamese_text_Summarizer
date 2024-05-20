@@ -1,35 +1,41 @@
-import React from "react";
-import NavBar from "../components/NavBar";
-import Footer from "../components/Footer";
+import React, { useEffect, useState } from 'react';
+import Users from '../components/Users';
+import SalesReport from '../components/SaleReport';
+import ApproveAdmin from '../components/ApproveAdmin';
 
-function AdminPage() {
+const AdminPage = () => {
+  const [activeSection, setActiveSection] = useState('users');
 
-    return(
-        <div>
-            <NavBar isLogin={true}/>
-            <div className="mx-auto p-4 w-full max-w-7xl">
-                <h1 className="grid grid-cols-1 justify-items-center text-2xl font-bold mb-4">Admin Page</h1>
-                <div className="flex">
-                    <div className="border-l-2 h-full">
-                        <div>
-                            <button className="p-2 hover:bg-gray-200 hover:rounded-md">
-                                Dashboard
-                            </button>
-                        </div>
-                        <div>
-                            <button className="p-2 hover:bg-gray-200 hover:rounded-md">
-                                Users management
-                            </button>
-                        </div>
-                    </div>
-                    <div className="bg-white border-2 border-gray-200 rounded-xl px-8 py-10 max-w-5xl w-full ml-6 h-screen max-h-96">
-                        
-                    </div>
-                </div>
-            </div>
-            <Footer />
-        </div>
-    );
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+      <nav className="mb-4">
+        <button
+          onClick={() => setActiveSection('users')}
+          className={`mr-4 border-b-2 border-white hover:border-green-700 ${activeSection === 'users' ? 'text-green-700 !border-green-700' : 'text-gray-500'}`}
+        >
+          Users
+        </button>
+        <button
+          onClick={() => setActiveSection('sales')}
+          className={`mr-4 border-b-2 border-white hover:border-green-700 ${activeSection === 'sales' ? 'text-green-700 !border-green-700' : 'text-gray-500'}`}
+        >
+          Sales Report
+        </button>
+        <button
+          onClick={() => setActiveSection('approve')}
+          className={`border-b-2 border-white hover:border-green-700 ${activeSection === 'approve' ? 'text-green-700 !border-green-700' : 'text-gray-500'}`}
+        >
+          Approve Admin
+        </button>
+      </nav>
+      <div>
+        {activeSection === 'users' && <Users />}
+        {activeSection === 'sales' && <SalesReport />}
+        {activeSection === 'approve' && <ApproveAdmin />}
+      </div>
+    </div>
+  );
 };
 
 export default {

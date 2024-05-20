@@ -44,7 +44,12 @@ function LoginPage() {
     .then(response => {
       console.log('then' + response.data)
       localStorage.setItem('email', username);
-      navigate({ pathname: '/' })
+      localStorage.setItem('role', response.data.role)
+      if (response.data.role === 'admin') {
+        navigate({ pathname: '/Admin' })
+      } else {
+        navigate({ pathname: '/' })
+      }
     })
     .catch(error => {
       console.log('catch ' + error.response.data.error)
