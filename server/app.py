@@ -456,7 +456,6 @@ def summerize_claude():
     data = request.json
     input_text = data.get('input-text')
     sentences = data.get('sentences')
-    input_length= len(input_text.split())
 
     if not input_text or not sentences:
         return jsonify({'error': 'Missing input text or number of sentences'}), 400
