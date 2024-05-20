@@ -24,6 +24,7 @@
     "@stripe/stripe-js": "^3.4.0",
     "@vscode/codicons": "^0.0.35",
     "axios": "^1.6.7",
+    "chart.js": "^4.4.3",
     "clipboard-copy": "^4.0.1",
     "date-fns": "^3.6.0",
     "jwt-decode": "^4.0.0",

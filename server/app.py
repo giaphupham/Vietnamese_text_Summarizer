@@ -682,6 +682,15 @@ def admin_report_sales():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def verify_admin_password(admin_id, password):
+    # Fetch admin's hashed password from the database
+    admin_response = supabase.table('user').select('password').eq('email', admin_id).execute()
+    if not admin_response.data:
+        return False  # Admin not found
+
+    hashed_password = admin_response.data[0].get('password')
+    return bcrypt.check_password_hash(hashed_password, password)
+
 @app.route('/admin_approve_admin', methods=['POST'])
 @login_required
 @admin_required
@@ -690,9 +699,15 @@ def admin_approve_admin():
     try:
         data = request.get_json()
         username = data.get('username')
+        password = data.get('password')
+        admin = data.get('admin')
 
-        if not username:
-            return jsonify({"error": "Missing username"}), 400
+        if not username or not password:
+            return jsonify({"error": "Missing username or password"}), 400
+
+        # Verify admin's password
+        if not verify_admin_password(admin, password):
+            return jsonify({"error": "Incorrect password"}), 401
         
         supabase.table('user').update({'role': 'admin'}).eq('email', username).execute()
 
