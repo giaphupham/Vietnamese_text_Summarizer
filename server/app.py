@@ -8,7 +8,7 @@ from model.abstract_model import summarizer
 from supabase import create_client, Client
 from email.message import EmailMessage
 from functools import wraps
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 from nltk.tokenize import sent_tokenize
 import ssl
 import smtplib
@@ -222,6 +222,13 @@ def summerize_long():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
     
+    # print('Origin: ')
+    # print(request.headers.get('Origin'))
+    
+    # data = request.json
+    # print(data.get('input-text'))
+    # print(data.get('sentences'))
+
     if 'summary_count' not in session:
         session['summary_count'] = 0
         session['last_summary_time'] = current_time
@@ -347,81 +354,81 @@ def summerize_short():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/summarize-number', methods=['POST'])
-@update_last_access
-def summarize_number():
-    ts = time.time()
-    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
-    if not request.json:
-        return jsonify({'error': 'No JSON data received'}), 400
+# @app.route('/summarize-number', methods=['POST'])
+# @update_last_access
+# def summarize_number():
+#     ts = time.time()
+#     current_time = datetime.datetime.fromtimestamp(ts, tz=None)
+#     if not request.json:
+#         return jsonify({'error': 'No JSON data received'}), 400
     
-    if 'summary_count' not in session:
-        session['summary_count'] = 0
-        session['last_summary_time'] = current_time
-    else:
-        last_summary_time = session.get('last_summary_time', current_time)
-        if current_time - last_summary_time >= datetime.timedelta(days=1):
-            session['summary_count'] = 0
-            session['last_summary_time'] = current_time
+#     if 'summary_count' not in session:
+#         session['summary_count'] = 0
+#         session['last_summary_time'] = current_time
+#     else:
+#         last_summary_time = session.get('last_summary_time', current_time)
+#         if current_time - last_summary_time >= datetime.timedelta(days=1):
+#             session['summary_count'] = 0
+#             session['last_summary_time'] = current_time
 
-    if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+#     if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+#         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
     
-    data = request.json
-    input_text = data.get('input-text')
-    output_sentences = data.get('sentences')
-    words_amount = len(input_text.split())
+#     data = request.json
+#     input_text = data.get('input-text')
+#     output_sentences = data.get('sentences')
+#     words_amount = len(input_text.split())
 
-    if not input_text or not output_sentences:
-        return jsonify({'error': 'Missing input text or number of sentences'}), 400
+#     if not input_text or not output_sentences:
+#         return jsonify({'error': 'Missing input text or number of sentences'}), 400
 
-    username = session.get('user')
+#     username = session.get('user')
 
-    try:
-        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+#     try:
+#         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
                 
-        max_words = 1500
-        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
-            max_words = 3000
+#         max_words = 1500
+#         if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
+#             max_words = 3000
 
-        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
-            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+#         if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
+#             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
-        print("flag1")
-        # Chia đoạn input thành các đoạn nhỏ
-        input_chunks = sent_tokenize(input_text) # array các câu
-        chunk_size = len(input_chunks) // output_sentences # số câu mỗi đoạn
+#         print("flag1")
+#         # Chia đoạn input thành các đoạn nhỏ
+#         input_chunks = sent_tokenize(input_text) # array các câu
+#         chunk_size = len(input_chunks) // output_sentences # số câu mỗi đoạn
         
-        # Tạo các đoạn input_segments tương ứng với số lượng output_sentences
-        input_segments = [' '.join(input_chunks[i * chunk_size: (i + 1) * chunk_size]) 
-                          for i in range(output_sentences)]
+#         # Tạo các đoạn input_segments tương ứng với số lượng output_sentences
+#         input_segments = [' '.join(input_chunks[i * chunk_size: (i + 1) * chunk_size]) 
+#                           for i in range(output_sentences)]
         
-        if len(input_segments) < output_sentences:
-            input_segments.append(' '.join(input_chunks[output_sentences * chunk_size:]))
+#         if len(input_segments) < output_sentences:
+#             input_segments.append(' '.join(input_chunks[output_sentences * chunk_size:]))
         
-        print(input_segments)
+#         print(input_segments)
 
-        with ThreadPoolExecutor(max_workers=output_sentences) as executor:
-            results = list(executor.map(summarizer, input_segments))
+#         with ThreadPoolExecutor(max_workers=output_sentences) as executor:
+#             results = list(executor.map(summarizer, input_segments))
         
-        print(results)
-        output_text = ' '.join(results)
-        print(output_text)
+#         print(results)
+#         output_text = ' '.join(results)
+#         print(output_text)
 
-        output_words = len(output_text.split())
+#         output_words = len(output_text.split())
 
-        session['summary_count'] += 1
-        session['last_summary_time'] = current_time
+#         session['summary_count'] += 1
+#         session['last_summary_time'] = current_time
 
-        return jsonify({
-            'message': 'Input text received successfully',
-            'output-text': output_text,
-            'words': output_words,
-            'sentences': output_sentences,
-            'max-words': max_words
-        }), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+#         return jsonify({
+#             'message': 'Input text received successfully',
+#             'output-text': output_text,
+#             'words': output_words,
+#             'sentences': output_sentences,
+#             'max-words': max_words
+#         }), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
 @app.route('/summarize-claude', methods=['POST'])
 @update_last_access
@@ -454,7 +461,7 @@ def summerize_claude():
             model="claude-3-haiku-20240307",
             max_tokens=1024,
             messages=[
-                {"role": "user", "content": "Tóm tắt văn bản sau còn "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
+                {"role": "user", "content": "Tóm tắt văn bản sau thành "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
             ]
         )
         summarizer, evaluate = load_model()
@@ -815,4 +822,4 @@ def change_password():
 
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False, threaded=True)
+    app.run(debug=False) # , threaded=True)
