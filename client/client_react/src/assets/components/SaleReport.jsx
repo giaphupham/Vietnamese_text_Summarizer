@@ -7,7 +7,7 @@ import HttpClient from './HttpClient';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const SalesReport = () => {
-  const [reportData, setReportData] = useState(null);
+  const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const SalesReport = () => {
   const fetchSalesReport = async () => {
     try {
       const response = await HttpClient.get('http://127.0.0.1:5000/admin_report_sales');
-      setReportData(response.data);
+      setData(response.data);
     } catch (error) {
       console.error(error);
       setError('Failed to fetch sales report');
@@ -28,39 +28,73 @@ const SalesReport = () => {
     return <div>{error}</div>;
   }
 
-  if (!reportData) {
+  if (!data) {
     return <div>Loading...</div>;
   }
 
-  const data = {
+  const totalRevenueData = {
     labels: ['Pro Subscription', 'Premium Subscription', 'Total Revenue'],
     datasets: [
       {
-        label: 'Revenue ($)',
-        data: [reportData.revenue_pro, reportData.revenue_premium, reportData.revenue_total],
-        backgroundColor: ['#3b82f6', '#10b981', '#f97316'],
+        label: 'Total Revenue',
+        data: [data.revenue_pro, data.revenue_premium, data.revenue_total],
+        backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
+  const monthlyLabels = data.monthly_revenues.map(revenue => revenue.month);
+  const proData = data.monthly_revenues.map(revenue => revenue.revenue_pro);
+  const premiumData = data.monthly_revenues.map(revenue => revenue.revenue_premium);
+
+  const monthlyRevenueData = {
+    labels: monthlyLabels,
+    datasets: [
+      {
+        label: 'Pro Revenue',
+        data: proData,
+        backgroundColor: '#4CAF50',
       },
-      title: {
-        display: true,
-        text: 'Sales Report',
+      {
+        label: 'Premium Revenue',
+        data: premiumData,
+        backgroundColor: '#FF9800',
       },
-    },
+    ],
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto mt-8">
-      <Bar data={data} options={options} />
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Revenue Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 border rounded shadow">
+          <h2 className="text-xl font-semibold mb-2">Total Revenue</h2>
+          <Bar data={totalRevenueData} />
+        </div>
+        <div className="p-4 border rounded shadow">
+        <h2 className="text-xl font-semibold mb-2">Monthly Revenue</h2>
+        <Bar data={monthlyRevenueData} options={{
+          indexAxis: 'x', // Horizontal bar chart
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Revenue ($)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            }
+          }
+        }} />
+      </div>
+      </div>
     </div>
   );
 };
+
 
 export default SalesReport;

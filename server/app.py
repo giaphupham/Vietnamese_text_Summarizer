@@ -17,12 +17,13 @@ import base64
 import os
 import stripe
 import json
-import datetime
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import time
 import anthropic
 from model.summary import Summarizer
 from model.evaluate import Evaluate
+from dateutil.relativedelta import relativedelta
+
 def load_model():
     s = Summarizer()
     e = Evaluate()
@@ -271,7 +272,7 @@ def summerize_long():
 @update_last_access
 def summerize_short():
     ts = time.time()
-    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
+    current_time = datetime.fromtimestamp(ts, tz=None)
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
     
@@ -604,21 +605,52 @@ def admin_get_users():
 @update_last_access
 def admin_report_sales():
     try:
-        response_1 = supabase.table('user').select('id', count='exact').eq('subscription',1).execute()
+        # Calculate the first and last day of the current month
+        today = datetime.now(timezone.utc)
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = first_day_of_month + relativedelta(months=1, days=-1)
+        
+        # Fetch the count of users with each subscription type
+        response_1 = supabase.table('user').select('id', count='exact').eq('subscription', 1).execute()
         count_type_1 = response_1.count
-        response_2 = supabase.table('user').select('id', count='exact').eq('subscription',2).execute()
+        response_2 = supabase.table('user').select('id', count='exact').eq('subscription', 2).execute()
         count_type_2 = response_2.count
-        revenue_pro = count_type_1 * 0.99
-        revenue_premium = count_type_2 * 9.99
+        
+        # Fetch active subscriptions for the current month
+        response_subs = supabase.table('subscriptions').select('*').gte('created_at', first_day_of_month.isoformat()).lte('expired_time', last_day_of_month.isoformat()).execute()
+        subscriptions = response_subs.data
+        
+        # Calculate the revenue for the current month
+        monthly_revenue_pro = sum(0.99 for sub in subscriptions if sub['type'] == 1)
+        monthly_revenue_premium = sum(9.99 for sub in subscriptions if sub['type'] == 2)
+
+        monthly_revenues = []
+        for i in range(12):
+            month_start = first_day_of_month - relativedelta(months=i)
+            month_end = month_start + relativedelta(months=1, days=-1)
+            response_subs = supabase.table('subscriptions').select('*').gte('created_at', month_start.isoformat()).lt('created_at', month_end.isoformat()).execute()
+            subscriptions = response_subs.data
+
+            monthly_revenue_pro = sum(0.99 for sub in subscriptions if sub['type'] == 1)
+            monthly_revenue_premium = sum(9.99 for sub in subscriptions if sub['type'] == 2)
+
+            monthly_revenues.append({
+                'month': month_start.strftime('%B %Y'),
+                'revenue_pro': monthly_revenue_pro,
+                'revenue_premium': monthly_revenue_premium,
+            })
+        
         return jsonify({
             "count_type_1": count_type_1,
             "count_type_2": count_type_2,
-            "revenue_pro": revenue_pro,
-            "revenue_premium": revenue_premium,
-            "revenue_total": revenue_pro+revenue_premium
+            "revenue_pro": count_type_1 * 0.99,
+            "revenue_premium": count_type_2 * 9.99,
+            "revenue_total": count_type_1 * 0.99 + count_type_2 * 9.99,
+            "monthly_revenues": monthly_revenues,
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 def verify_admin_password(admin_id, password):
     # Fetch admin's hashed password from the database
     admin_response = supabase.table('user').select('password').eq('email', admin_id).execute()
@@ -756,15 +788,27 @@ def upgrade_plan():
     data = request.json
     plan = data.get('plan')
     user = data.get('user') 
+
     user_id = supabase.table('user').select('id').eq('email', user).execute()
-    supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
-        # Insert data into the subscriptions table
-    supabase.table('subscriptions').insert({
-            'user_id': user_id.data[0]['id'],
+
+    # Calculate the start day and end day
+    start_day = datetime.now(timezone.utc)
+    end_day = start_day + timedelta(days=30)
+    print(user_id)
+    try:
+        supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
+        supabase.table('subscriptions').insert({
+            'user_id': 1,
             'payment menthod': 'card',
-            'type':plan,
+            'created_at': start_day.isoformat(),
+            'expired_time': end_day.isoformat(),
+            'type': plan,
         }).execute()
-    return jsonify({'message': 'Plan upgraded successfully'}), 200
+
+        return jsonify({'message': 'Plan upgraded successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/login_by_acc', methods=['POST'])
 def login_and_register_by_3rd_party():
