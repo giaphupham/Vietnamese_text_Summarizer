@@ -102,7 +102,8 @@ def admin_ban_user():
         user_id = data.get('email')
         
         user_response = supabase.table('user').select('role').eq('email', user_id).execute()
-        if not user_response.data or user_response.data[0]['role'] == 'super_admin':
+        print(user_response.data[0]['role'])
+        if not user_response.data or user_response.data[0]['role'] == 's_admin':
             return jsonify({"error": "Cannot ban super admin"}), 403
         
         response = supabase.table('user').update({"banned": 'Banned'}).eq('email', user_id).execute()

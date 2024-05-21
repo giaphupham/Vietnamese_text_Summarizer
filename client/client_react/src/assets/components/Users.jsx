@@ -64,7 +64,9 @@ const Users = () => {
       fetchUsers();
     } catch (error) {
       if (error.response && error.response.status === 403) {
-        setErrorMessage('Cannot ban super admin');
+        console.error(error.response.data.error);
+        toast.error(error.response.data.error, {autoClose: 3000});
+        setErrorMessage(error.response.data.error);
 
       } else {
         console.error(error);
