@@ -73,13 +73,15 @@ def login_required(f):
             return redirect(url_for('login')), 401
         return f(*args, **kwargs)
     return decorated_function
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'role' not in session or session['role'] != 'admin':
+        if 'role' not in session or (session['role'] != 'admin' and session['role'] != 's_admin'):
             return jsonify(message="Admins only!"), 403
         return f(*args, **kwargs)
     return decorated_function
+
 def update_last_access(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -88,6 +90,7 @@ def update_last_access(f):
         supabase.table('user').update({'last_access': 'now()'}).eq('email', session.get('user')).execute()
         return f(*args, **kwargs)
     return decorated_function
+
 @app.route('/admin_ban_user', methods=['PUT'])
 @login_required
 @admin_required
@@ -105,6 +108,7 @@ def admin_ban_user():
         return jsonify(response.data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 @app.route('/admin_unban_user', methods=['PUT'])
 @login_required
 @admin_required
@@ -123,6 +127,7 @@ def admin_unban_user():
         return jsonify(response.data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 @app.route('/sub', methods=['POST'])
 def sub():
     email = request.json.get('email', None)
@@ -157,6 +162,7 @@ def sub():
     user_info['email'] = email
     
     return {'status': status, 'client_secret': client_secret}, 200
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     payload = request.get_data()
@@ -186,11 +192,14 @@ def webhook():
     else:
         return 'Unexpected event type', 400
     return '', 200
+
 @app.route('/status', methods=['GET'])
 def user_status():
     user_logged_in = session.get('logged_in')
     return jsonify({'loggedIn': user_logged_in})
+
 MAX_FREE_SUMMARIES = 3
+
 @app.route('/summarize-long', methods=['POST'])
 @update_last_access
 def summerize_long():
@@ -476,9 +485,11 @@ def login():
                     session['logged_in'] = True
                     session['summary_count'] = 0
                     session['subscription'] = subscription
-                    if role == 'admin':
+
+                    if role == 'admin' or role == 's_admin':
                         return jsonify(dtb_result.data[0])
                     else:
+                        print("ở đây")
                         return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
@@ -513,6 +524,7 @@ def reset_password():
             return jsonify({'message': 'Password updated successfully'}), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+        
 def generate_otp():
     return secrets.token_hex(3)
 @app.route('/send_otp_email', methods=['POST'])
@@ -569,6 +581,7 @@ def save_text():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved successfully"}), 200
+
 @app.route('/admin_get_users', methods=['GET'])
 @login_required
 @admin_required
@@ -613,6 +626,42 @@ def verify_admin_password(admin_id, password):
         return False  # Admin not found
     hashed_password = admin_response.data[0].get('password')
     return bcrypt.check_password_hash(hashed_password, password)
+
+@app.route('/admin_delete_admin', methods=['POST'])
+@login_required
+@admin_required
+@update_last_access
+def admin_delete_admin():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        admin = data.get('admin')
+
+        if not username or not password:
+            return jsonify({"error": "Missing admin email"}), 400
+
+        # Check if the current user is a super admin
+        # current_user_role = supabase.table('user').select('role').eq('email', admin_email).execute().data[0].get('role')
+        # if current_user_role != 's_admin':
+        #     return jsonify({"error": "Only super admins can delete admins"}), 403
+
+        # # Ensure the admin being deleted is not a super admin
+        # admin_to_delete = supabase.table('user').select('role').eq('email', user_email).execute().data[0]
+        # if admin_to_delete.get('role') == 's_admin':
+        #     return jsonify({"error": "Cannot delete a super admin"}), 403
+
+        if not verify_admin_password(admin, password):
+            return jsonify({"error": "Incorrect password"}), 401
+
+        # Perform the deletion
+        supabase.table('user').update({'role': 'user'}).eq('email', username).execute()
+
+        return jsonify({"message": "Admin deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/admin_approve_admin', methods=['POST'])
 @login_required
 @admin_required
@@ -635,6 +684,7 @@ def admin_approve_admin():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
 def profile():
@@ -699,6 +749,7 @@ def change_name():
     supabase.table('user').update({"name": new_name}).eq('email', email).execute()
     
     return jsonify({'message': 'Name changed successfully'}), 200
+
 @app.route('/upgrade', methods=['POST', 'GET'])
 @login_required
 def upgrade_plan():
@@ -714,6 +765,7 @@ def upgrade_plan():
             'type':plan,
         }).execute()
     return jsonify({'message': 'Plan upgraded successfully'}), 200
+
 @app.route('/login_by_acc', methods=['POST'])
 def login_and_register_by_3rd_party():
     data = request.json
@@ -750,4 +802,4 @@ def change_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=False) # , threaded=True)
+    app.run(debug=True) # , threaded=True)

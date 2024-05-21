@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import Users from '../components/Users';
 import SalesReport from '../components/SaleReport';
 import ApproveAdmin from '../components/ApproveAdmin';
+import NavBar from '../components/NavBar';
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState('users');
 
   return (
-    <div className="p-4">
+    <div>
+    <NavBar />
+    <div className='pt-4 mx-4'>
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       <nav className="mb-4">
         <button
@@ -29,11 +32,12 @@ const AdminPage = () => {
           Approve Admin
         </button>
       </nav>
-      <div>
+      <div className=''>
         {activeSection === 'users' && <Users />}
         {activeSection === 'sales' && <SalesReport />}
         {activeSection === 'approve' && <ApproveAdmin />}
       </div>
+    </div>
     </div>
   );
 };

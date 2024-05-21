@@ -26,6 +26,7 @@ const AccountButton = () => {
         if (response.status === 200) {
           // Redirect to login page after successful logout
           localStorage.removeItem('email');
+          localStorage.removeItem('role');
           navigate({ pathname: '/Login' })
         } else {
           // Handle logout failure
