@@ -137,7 +137,11 @@ def require_origin(f):
 
 @app.after_request
 def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Server'] = 'VietnameseTextSummarizer_SERVER'
     return response
 
 @app.route('/admin_ban_user', methods=['PUT'])
