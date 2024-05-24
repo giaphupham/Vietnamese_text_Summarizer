@@ -10,6 +10,7 @@ from email.message import EmailMessage
 from functools import wraps
 # from concurrent.futures import ThreadPoolExecutor
 from nltk.tokenize import sent_tokenize
+from werkzeug.utils import secure_filename
 import ssl
 import smtplib
 import secrets
@@ -18,6 +19,7 @@ import os
 import stripe
 import json
 import datetime
+import math
 from datetime import timedelta
 import time
 
@@ -80,6 +82,7 @@ stripe.api_key = stripe_keys["secret_key"]
 
 
 YOUR_DOMAIN = 'http://127.0.0.1:5000'
+CLIENT_ORIGIN = 'http://localhost:5173' # https://vietnamese-text-summarizer.onrender.com/
 
 
 CORS(app, supports_credentials=True)
@@ -110,6 +113,21 @@ def update_last_access(f):
         if 'user' not in session:
             return f(*args, **kwargs)
         supabase.table('user').update({'last_access': 'now()'}).eq('email', session.get('user')).execute()
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_origin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        request_origin = request.headers.get('Origin')
+        if not request_origin:
+            response = jsonify({'error': 'Forbiden access!'})
+            response.status_code = 403
+            return response
+        if request_origin != CLIENT_ORIGIN:
+            response = jsonify({'error': 'Forbiden access!'})
+            response.status_code = 403
+            return response
         return f(*args, **kwargs)
     return decorated_function
 
@@ -235,18 +253,13 @@ MAX_FREE_SUMMARIES = 3
 
 @app.route('/summarize-long', methods=['POST'])
 @update_last_access
+@require_origin
 def summerize_long():
     ts = time.time()
     current_time = datetime.datetime.fromtimestamp(ts, tz=None)
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
-    
-    # print('Origin: ')
-    # print(request.headers.get('Origin'))
-    
-    # data = request.json
-    # print(data.get('input-text'))
-    # print(data.get('sentences'))
+
 
     if 'summary_count' not in session:
         session['summary_count'] = 0
@@ -267,7 +280,7 @@ def summerize_long():
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
-    output_sentences = round(data.get('sentences') / 2)
+    output_sentences = math.ceil(data.get('sentences') / 2)
 
     if not input_text or not output_sentences:
         return jsonify({'error': 'Missing input text or number of sentences'}), 400
@@ -774,33 +787,30 @@ def feedback():
 
 
 UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-    
-@app.route('/upload', methods=['POST'])
-@login_required
-def upload_file():
-    
-    # Extract file data from JSON payload
-    json_data = request.get_json()
-    if 'file' not in json_data:
-        return jsonify({"error": "File data not found in JSON payload"}), 400
-    
-    data = request.json
-    file_data = data.get('file')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-    #file_data = json_data['file']
+# Các đuôi tệp hợp lệ
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST']) # gửi value là file ng dùng up vào key 'file' trong json request
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file in request"}), 400
     
-    # Decode base64 data
-    file_content = base64.b64decode(file_data)
+    file = request.files['file']
     
-    # Save file to upload folder
-    filename = 'uploaded_file.txt'  # You can define your own filename logic here
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    with open(file_path, 'wb') as f:
-        f.write(file_content)
+    if file.filename == '':
+        return jsonify({"error": "No file in request"}), 400
     
-    return jsonify({"message": "File uploaded successfully"}), 200
+    if file and allowed_file(file.filename):
+        content = file.read().decode('utf-8', errors='ignore')
+        return jsonify({"message": "File upload successfully","content":content}), 200
+    else:
+        return jsonify({"error": "Invalid file type"}), 400
 
 @app.route('/change_name', methods=['POST'])
 def change_name():
