@@ -85,7 +85,11 @@ YOUR_DOMAIN = 'http://127.0.0.1:5000'
 CLIENT_ORIGIN = 'http://localhost:5173' # https://vietnamese-text-summarizer.onrender.com/
 
 
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, resources={
+    r"/*": {
+        "origins": ["http://localhost:5173", "https://vietnamese-text-summarizer.onrender.com"]
+    }
+})
 bcrypt = Bcrypt(app)
 
 MAX_FILE_SIZE = 5 * 1024 * 1024
