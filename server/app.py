@@ -135,6 +135,11 @@ def require_origin(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    return response
+
 @app.route('/admin_ban_user', methods=['PUT'])
 @login_required
 @admin_required
