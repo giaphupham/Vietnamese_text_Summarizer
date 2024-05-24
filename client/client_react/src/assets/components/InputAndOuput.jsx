@@ -100,7 +100,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         setScore(data['score']);
       })
       .catch(error => {
-        console.log('catch ' + error.response.data.error)
+        //console.log('catch ' + error.response.data.error)
         // toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
         setShowPlan(true);
