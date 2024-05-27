@@ -11,6 +11,7 @@ from functools import wraps
 # from concurrent.futures import ThreadPoolExecutor
 from nltk.tokenize import sent_tokenize
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 import ssl
 import smtplib
 import secrets
@@ -27,6 +28,8 @@ from model.summary import Summarizer
 from model.evaluate import Evaluate
 from dateutil.relativedelta import relativedelta
 
+load_dotenv()
+
 def load_model():
     s = Summarizer()
     e = Evaluate()
@@ -42,10 +45,11 @@ swaggerui_blueprint = get_swaggerui_blueprint(
     }
 )
 otp_dict = {}
-email_sender ="vietnamesetextsummarizer@gmail.com"
-email_password = "xjbh hilu ypsr fyfm"
-url="https://aysbefqelgclhktauxfh.supabase.co"
-key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5c2JlZnFlbGdjbGhrdGF1eGZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk4MTY2NTYsImV4cCI6MjAyNTM5MjY1Nn0.4rIWcGGYhnvLX4O6VWnCH0hoYU_nbz-TKHk5QZb0OC0"
+email_sender = os.getenv('EMAIL_SENDER')
+email_password = os.getenv('EMAIL_PASSWORD')
+
+url=os.getenv('DTB_URL')
+key=os.getenv('DTB_KEY')
 supabase: Client = create_client(url, key)
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
 app.config["SESSION_COOKIE_SECURE"] = True
@@ -55,15 +59,15 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=5)
 Session(app)
 client = anthropic.Anthropic(
     # defaults to os.environ.get("ANTHROPIC_API_KEY")
-    api_key="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",
+    api_key=os.getenv('CLAUDE_API_KEY'),
 )
 user_info = {}
 stripe_keys = {
-    "secret_key": "sk_test_51PH03zRtjuoXgTndUdXLHWaUYUehy3JPC6iNWUbFG0Fr5fIDt6PZ8aQ8LSB52WThZYK7bVyquEH1kCVLJkEXc6ht00YoBVMKBe",
-    "publishable_key": "sk_test_51PH03zRtjuoXgTndUdXLHWaUYUehy3JPC6iNWUbFG0Fr5fIDt6PZ8aQ8LSB52WThZYK7bVyquEH1kCVLJkEXc6ht00YoBVMKBe",
-    "pro_plan_id" : "price_1PH4H2RtjuoXgTndyQUnP94v"
+    "secret_key": os.getenv('STRIPE_SECRET_KEY'),
+    "publishable_key": os.getenv('STRIPE_PUBLISHABLE_KEY'),
+    "pro_plan_id" : os.getenv('STRIPE_PRO_PLAN_ID')
 }
-endpoint_secret = 'whsec_71999dae1a449143ed5d672ad61f020236431f5d89eefe7f786d7e3a4767ef51'
+endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
 stripe.api_key = stripe_keys["secret_key"]
 YOUR_DOMAIN = 'http://127.0.0.1:5000'
 CLIENT_ORIGIN = 'http://localhost:5173' # https://vietnamese-text-summarizer.onrender.com/
