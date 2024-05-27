@@ -7,7 +7,7 @@ class LongSummarizer(SequentialTaskSet):
     @task
     def login(self):
         data ={
-            'username':'nguyenphamkien15@gmail.com',
+            'username':'20120385@student.hcmus.edu.vn',
             'password':'123',
             'withCredentials':'true'
         }
