@@ -19,7 +19,6 @@ import base64
 import os
 import stripe
 import json
-import datetime
 import math
 from datetime import timedelta, datetime, timezone
 import time
@@ -75,7 +74,7 @@ CLIENT_ORIGIN = 'http://localhost:5173' # https://vietnamese-text-summarizer.onr
 
 CORS(app, supports_credentials=True, resources={
     r"/*": {
-        "origins": ["http://localhost:5173", "https://vietnamese-text-summarizer.onrender.com"]
+        "origins": ["http://localhost:5173","http://localhost:5000", "https://vietnamese-text-summarizer.onrender.com"]
     }
 })
 bcrypt = Bcrypt(app)
@@ -236,7 +235,7 @@ def webhook():
 @app.route('/status', methods=['GET'])
 def user_status():
     user_logged_in = session.get('logged_in')
-    return jsonify({'loggedIn': user_logged_in})
+    return jsonify({'loggedIn': user_logged_in}), 200
 
 MAX_FREE_SUMMARIES = 3
 
@@ -245,7 +244,7 @@ MAX_FREE_SUMMARIES = 3
 @require_origin
 def summerize_long():
     ts = time.time()
-    current_time = datetime.datetime.fromtimestamp(ts, tz=None)
+    current_time = datetime.fromtimestamp(ts, tz=None)
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
 
@@ -475,6 +474,7 @@ def summerize_claude():
 @update_last_access
 def home():
     return jsonify({'message': 'At home: Logged in successfully'}), 200
+
 @app.route('/register', methods=['POST'])
 def register():
     if not request.json:
@@ -757,7 +757,7 @@ def admin_approve_admin():
 @login_required
 def profile():
     try:
-        print (session.get('user'))
+        # print (session.get('user'))
         data = request.json
         username = data.get('username')
         dtb_result = supabase.table('user').select('name', 'subscription', 'created_at').eq('email', username).execute()
