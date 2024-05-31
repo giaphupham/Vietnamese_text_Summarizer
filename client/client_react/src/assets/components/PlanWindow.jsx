@@ -47,7 +47,7 @@ const PlanWindow = ({ plan }) => {
 
   const sendUpgradeRequest = async (selectedPlan) => {
     try {
-      const response = await HttpClient.post('http://127.0.0.1:5000/upgrade', { plan: selectedPlan, user: localStorage.getItem('email')});
+      const response = await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/upgrade`, { plan: selectedPlan, user: localStorage.getItem('email')});
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');

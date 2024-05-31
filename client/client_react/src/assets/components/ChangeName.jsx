@@ -13,7 +13,7 @@ const ChangeNameModal = ({ isOpen, onClose }) => {
       const email = localStorage.getItem('email');
       try {
         // Make a POST request to your Flask backend to change the NamesetNewName
-        const response = await axios.post(`${import.meta.env.REACT_APP_API_URL}/change_name`, {
+        const response = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/change_name`, {
             new_name: NewName,
             email: email,
           // Pass any necessary data for changing the Name

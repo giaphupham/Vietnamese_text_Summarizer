@@ -33,10 +33,10 @@ function LoginPage() {
   }
 
   const handleLogin = async (e) => {
-    e.preventDefault();
 
+    e.preventDefault();
     setLoading(true);
-    await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/login`, {
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login`, {
       "username": username,
       "password": password,
       withCredentials: true,
@@ -63,7 +63,7 @@ function LoginPage() {
 
     setLoading(true);
     console.log(res);
-    await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/login_by_acc`, {      
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login_by_acc`, {      
         email: res.email,
         name: res.name,
         withCredentials: true,
@@ -81,7 +81,7 @@ function LoginPage() {
   const responseGoogle = async (response) => {
     const res = jwtDecode(response.credential);
       
-    await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/login_by_acc`, {      
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login_by_acc`, {      
         email: res.email,
         name: res.name,
         withCredentials: true,
@@ -97,7 +97,7 @@ function LoginPage() {
   };
 
   useEffect(() => {
-    axios.get(`${import.meta.env.REACT_APP_API_URL}/home`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/home`, { withCredentials: true })
         .then(response => {
             if (response.status === 200) {
                 console.log(response.data.message);
