@@ -1,1 +1,5 @@
 .env
+**/__pycache__/
+**/model/
+**/flask_session/
+test.py
