@@ -60,7 +60,7 @@ const Users = () => {
 
   const handleBanUser = async (id) => {
     try {
-      await HttpClient.put('http://127.0.0.1:5000/admin_ban_user', { email: id});
+      await HttpClient.put(`${import.meta.env.REACT_APP_API_URL}/admin_ban_user`, { email: id});
       fetchUsers();
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -78,7 +78,7 @@ const Users = () => {
 
   const handleUnbanUser = async (id) => {
     try {
-      await HttpClient.put('http://127.0.0.1:5000/admin_unban_user', { email: id });
+      await HttpClient.put(`${import.meta.env.REACT_APP_API_URL}/admin_unban_user`, { email: id });
       fetchUsers();
     } catch (error) {
       console.error(error);

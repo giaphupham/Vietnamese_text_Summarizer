@@ -18,7 +18,7 @@ const FeedbackWindow = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await HttpClient.post('http://127.0.0.1:5000/feedback', {
+    await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/feedback`, {
       
       'comment': feedback,
       'star': rating,

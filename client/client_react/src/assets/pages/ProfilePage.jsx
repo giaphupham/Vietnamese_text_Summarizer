@@ -39,7 +39,7 @@ function UserProfile() {
   console.log(user);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+    axios.get(`${import.meta.env.REACT_APP_API_URL}/home`, { withCredentials: true })
       .then(response => {
         if (response.status === 200) {
           console.log(response.data.message);
@@ -58,7 +58,7 @@ function UserProfile() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await HttpClient.post('http://127.0.0.1:5000/profile', {
+        const response = await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/profile`, {
           username: user,
         });
         setUserData(response.data);

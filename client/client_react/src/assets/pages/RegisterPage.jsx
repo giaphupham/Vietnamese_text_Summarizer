@@ -14,7 +14,7 @@ function RegisterPage() {
   const handleRegister = async (data) => {
     localStorage.setItem('email', data.username);
     setLoading(true);
-    await axios.post('http://127.0.0.1:5000/register', {
+    await axios.post(`${import.meta.env.REACT_APP_API_URL}/register`, {
       'username': data.username,
       'password': data.password,
       'name': data.name
@@ -35,7 +35,7 @@ function RegisterPage() {
 
   const sendOTP = async (email) => {
     try {
-        await axios.post('http://127.0.0.1:5000/send_otp_email', { 'email': email });
+        await axios.post(`${import.meta.env.REACT_APP_API_URL}/send_otp_email`, { 'email': email });
         console.log('OTP sent successfully!');
     } catch (error) {
         console.error(error);
@@ -43,7 +43,7 @@ function RegisterPage() {
     }
 };
     useEffect(() => {
-      axios.get('http://127.0.0.1:5000/home', { withCredentials: true })
+      axios.get(`${import.meta.env.REACT_APP_API_URL}/home`, { withCredentials: true })
           .then(response => {
               if (response.status === 200) {
                   console.log(response.data.message);

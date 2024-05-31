@@ -16,7 +16,7 @@ const SalesReport = () => {
 
   const fetchSalesReport = async () => {
     try {
-      const response = await HttpClient.get('http://127.0.0.1:5000/admin_report_sales');
+      const response = await HttpClient.get(`${import.meta.env.REACT_APP_API_URL}/admin_report_sales`);
       setData(response.data);
     } catch (error) {
       console.error(error);

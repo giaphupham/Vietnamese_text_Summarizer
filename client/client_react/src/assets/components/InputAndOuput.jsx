@@ -101,7 +101,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
       })
       .catch(error => {
         //console.log('catch ' + error.response.data.error)
-        // toast.error(error.response.data.error, {autoClose: 3000});
+        toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
         setShowPlan(true);
       });
