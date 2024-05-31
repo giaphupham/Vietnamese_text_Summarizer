@@ -1,4 +1,3 @@
-_pycache_
-flask_session
 .env
-model/_pycache_
+**/__pycache__/
+flask_session

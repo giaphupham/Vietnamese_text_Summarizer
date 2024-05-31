@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, session, redirect, url_for
-from init import app, supabase, ALLOW_ORIGINS
+from flask import request, jsonify, session, redirect, url_for
+from init import supabase, ALLOW_ORIGINS
 from functools import wraps
 
 def login_required(f):
@@ -43,11 +43,3 @@ def require_origin(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.after_request
-def add_security_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['Content-Security-Policy'] = "frame-ancestors 'self'"
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['Server'] = 'HCMUSummarizer_SERVER'
-    return response
