@@ -104,7 +104,9 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         //console.log('catch ' + error.response.data.error)
         toast.error(error.response.data.error, {autoClose: 3000});
         setLoading(false);
-        setShowPlan(true);
+        if (error.response.status === 403) {
+          setShowPlan(true);
+        }
       });
 
   };
