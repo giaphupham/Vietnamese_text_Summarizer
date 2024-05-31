@@ -23,7 +23,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
       const email = localStorage.getItem('email');
       try {
         // Make a POST request to your Flask backend to change the password
-        const response = await axios.post('http://127.0.0.1:5000/change_password', {
+        const response = await axios.post(`${import.meta.env.REACT_APP_API_URL}/change_password`, {
             new_password: newPassword,
             email: email,
           // Pass any necessary data for changing the password

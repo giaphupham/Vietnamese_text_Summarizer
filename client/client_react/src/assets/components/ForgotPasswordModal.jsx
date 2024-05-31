@@ -17,7 +17,7 @@ const ForgotPasswordModal = ({ onClose }) => {
         setLoading(true); // Set loading state to true
         if (step === 1) {
             try {
-                await axios.post('http://127.0.0.1:5000/send_otp_email', { email });
+                await axios.post(`${import.meta.env.REACT_APP_API_URL}/send_otp_email`, { email });
                 setStep(2);
             } catch (error) {
                 setError('Failed to send OTP. Please try again.');
@@ -26,7 +26,7 @@ const ForgotPasswordModal = ({ onClose }) => {
             }
         } else if (step === 2) {
             try {
-                await axios.post('http://127.0.0.1:5000/verify_otp', { email, otp: code });
+                await axios.post(`${import.meta.env.REACT_APP_API_URL}/verify_otp`, { email, otp: code });
                 setStep(3);
             } catch (error) {
                 setError('Incorrect code. Please try again.');
@@ -40,7 +40,7 @@ const ForgotPasswordModal = ({ onClose }) => {
                 return;
             }
             try {
-                await axios.post('http://127.0.0.1:5000/resetpassword', { username: email, 'new-password': newPassword });
+                await axios.post(`${import.meta.env.REACT_APP_API_URL}/resetpassword`, { username: email, 'new-password': newPassword });
                 setError('');
                 onClose();
             } catch (error) {
