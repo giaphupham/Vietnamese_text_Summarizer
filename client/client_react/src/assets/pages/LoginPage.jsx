@@ -35,8 +35,9 @@ function LoginPage() {
   const handleLogin = async (e) => {
 
     e.preventDefault();
+    console.log(import.meta.env.VITE_REACT_APP_URL)
     setLoading(true);
-    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login`, {
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login`, {
       "username": username,
       "password": password,
       withCredentials: true,
@@ -63,7 +64,7 @@ function LoginPage() {
 
     setLoading(true);
     console.log(res);
-    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login_by_acc`, {      
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login_by_acc`, {      
         email: res.email,
         name: res.name,
         withCredentials: true,
@@ -81,7 +82,7 @@ function LoginPage() {
   const responseGoogle = async (response) => {
     const res = jwtDecode(response.credential);
       
-    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login_by_acc`, {      
+    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login_by_acc`, {      
         email: res.email,
         name: res.name,
         withCredentials: true,
@@ -97,7 +98,7 @@ function LoginPage() {
   };
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/home`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_REACT_APP_URL}/home`, { withCredentials: true })
         .then(response => {
             if (response.status === 200) {
                 console.log(response.data.message);
@@ -127,7 +128,7 @@ function LoginPage() {
             <div className="flex flex-col mb-6 justify-center">
               <div className="mb-4">
                 <FacebookLogin
-                  appId={import.meta.env.FACEBOOK_ID}
+                  appId={import.meta.env.VITE_FACEBOOK_ID}
                   callback={responseFacebook}
                   fields="name,email"
                   autoLoad={false}

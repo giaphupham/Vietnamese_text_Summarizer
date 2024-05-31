@@ -12,7 +12,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UpgradePopUp from './UpgradePopUp';
 
-const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
+const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [showNotification, setShowNotification] = useState(false);
@@ -80,13 +80,14 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         toast.error('You have reached the maximum number of free summaries. Please log in to continue.', {autoClose: 3000});
         return;
       }
+      console.log(inputText + ' ' + numberSentences);
 
-      const apiUrl = summarizeType === 'short' ? `${import.meta.env.VITE_REACT_APP_URL}/summarize-short` : `${import.meta.env.VITE_REACT_APP_URL}/summarize-long`;
-
+      //const apiUrl = summarizeType === 'short' ? `${import.meta.env.VITE_REACT_APP_URL}/summarize-short` : `${import.meta.env.VITE_REACT_APP_URL}/summarize-long`;
+      const apiUrl = `${import.meta.env.VITE_REACT_APP_URL}/summarize`;
       setLoading(true);
       await HttpClient.post(apiUrl, {
         'input-text': inputText,
-        'sentences': countSentences(),
+        'sentences': numberSentences,
         withCredentials: true,
       })
       .then(response => {

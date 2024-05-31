@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { MdOutlineFeedback } from "react-icons/md";
 
 
-function ControlBar({theme, setSummarizeType, onClick}) {
+function ControlBar({theme, setSummarizeType, onClick, setNumberSentences}) {
   const [mode, setMode] = useState('short');
+  const [numberSentences, setNumberSentence] = useState(0);
 
   const handleModeChange = (e) => {
     const newMode = e.target.value === '0' ? 'short' : 'long';
@@ -11,11 +12,19 @@ function ControlBar({theme, setSummarizeType, onClick}) {
     setSummarizeType(newMode);
   };
 
+  const handleNumberSentencesChange = (e) => {
+    console.log(e.target.value);
+    const NewnumberSentences = e.target.value;
+    setNumberSentence(NewnumberSentences);
+    setNumberSentences(NewnumberSentences);
+    
+  };
+
 
   return (
     <div className={`flex ${theme} `} >
       <div className="w-full max-w-full py-2 px-4 flex items-center border-b-2 justify-between">
-        <div className='flex'>
+        {/* <div className='flex'>
           <label className="block text-lg font-bold mr-2" htmlFor="mode">
             Mode:
           </label>
@@ -37,6 +46,21 @@ function ControlBar({theme, setSummarizeType, onClick}) {
                   Long
               </p>
           </div>
+        </div> */}
+        <div className='flex item-center'>
+          <label className="block text-lg font-bold mr-2" htmlFor="numberSentences">
+            Number of Sentences:
+          </label>
+          <input
+            type="number"
+            id="numberSentences"
+            name="numberSentences"
+            min="0"
+            max="10"
+            value={numberSentences}
+            onChange={handleNumberSentencesChange}
+            className="accent-[#178733] w-14 mx-1 border-2 px-2 rounded-md"
+          />
         </div>
         <div className='text-xl self-end hover:bg-gray-200 p-2 rounded-full cursor-pointer' onClick={onClick}>
           <MdOutlineFeedback />

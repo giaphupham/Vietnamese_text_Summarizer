@@ -10,6 +10,7 @@ function MainField() {
   const [summarizeType, setSummarizeType] = useState('short');
   const [showFeedback, setShowFeedback] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [numberSentences, setNumberSentences] = useState(0);
 
   const handleFeedbackClick = () => {
     setShowFeedback(true);
@@ -42,8 +43,8 @@ function MainField() {
 
   return (
     <div className="flex flex-col max-w-6xl mx-auto mt-20 border rounded-xl shadow-md">
-        <ControlBar setSummarizeType={setSummarizeType} onClick={handleFeedbackClick}/>
-        <InputAndOutput summarizeType={summarizeType} showFeedback={showFeedback} Close={handleCloseFeedback}/>
+        <ControlBar setSummarizeType={setSummarizeType} onClick={handleFeedbackClick} setNumberSentences={setNumberSentences}/>
+        <InputAndOutput summarizeType={summarizeType} showFeedback={showFeedback} Close={handleCloseFeedback} numberSentences={numberSentences}/>
        
       
     </div>

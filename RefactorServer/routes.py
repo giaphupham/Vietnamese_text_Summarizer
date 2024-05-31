@@ -133,6 +133,82 @@ def user_status():
 
 MAX_FREE_SUMMARIES = 3
 
+@app.route('/summarize', methods=['POST'])
+@update_last_access
+@require_origin
+def summerize():
+    ts = time.time()
+    current_time = datetime.fromtimestamp(ts, tz=None)
+    if not request.json:
+        return jsonify({'error': 'No JSON data received'}), 400
+
+
+    if 'summary_count' not in session:
+        session['summary_count'] = 0
+        session['last_summary_time'] = current_time
+    else:
+        last_summary_time = session.get('last_summary_time', current_time)
+        if current_time - last_summary_time >= timedelta(days=1):
+            session['summary_count'] = 0
+            session['last_summary_time'] = current_time
+    if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
+        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
+        return jsonify({'error': 'Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
+    elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
+        return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
+    
+    data = request.json
+    input_text = data.get('input-text')
+    words_amount = len(input_text.split())
+    sentences = int(data.get('sentences'))
+
+    if not input_text:
+        return jsonify({'error': 'Missing input text '}), 400
+    username = session.get('user')
+
+    try:
+        max_words = 700
+        if username!=None:
+            # dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()                     
+            
+            max_words = 1500
+            subscription= session['subscription']
+            if(subscription != 0):
+                max_words = 3000
+
+            if(words_amount > max_words and (subscription==0)):
+                return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+            
+        output_text = summarizer(input_text)
+        output_words = len(output_text.split())
+        output_sentences = len(sent_tokenize(output_text))
+        r, evaluate = load_model()
+        score = evaluate.content_based(output_text, input_text)
+        session['summary_count'] += 1
+        session['last_summary_time'] = current_time
+
+        print(output_sentences, sentences)
+        if output_sentences > sentences and sentences > 0:
+            result = r.summarize(output_text, mode="lsa", keep_sentences= sentences)
+            output_text_new = result[0]
+        else:
+            output_text_new = output_text
+        
+        output_sentences_new = len(sent_tokenize(output_text_new))
+        return jsonify({
+            'message': 'Input text received successfully',
+            'output-text': output_text_new,
+            'words': output_words,
+            'sentences': output_sentences_new,
+            'max-words': max_words,
+            'score': round(score * 100)
+            }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 @app.route('/summarize-long', methods=['POST'])
 @update_last_access
 @require_origin
@@ -202,6 +278,8 @@ def summerize_long():
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
 @app.route('/summarize-short', methods=['POST'])
 @update_last_access
 def summerize_short():
@@ -728,20 +806,20 @@ def upgrade_plan():
     plan = data.get('plan')
     user = data.get('user') 
 
-    user_id = supabase.table('user').select('id').eq('email', user).execute()
-
+    print(plan, user)
     # Calculate the start day and end day
     start_day = datetime.now(timezone.utc)
     end_day = start_day + timedelta(days=30)
-    print(user_id)
+
     try:
         supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
         supabase.table('subscriptions').insert({
-            'user_id': 1,
+            'user_email': user,
             'payment menthod': 'card',
             'created_at': start_day.isoformat(),
             'expired_time': end_day.isoformat(),
             'type': plan,
+            'status': 'active'
         }).execute()
 
         return jsonify({'message': 'Plan upgraded successfully'}), 200

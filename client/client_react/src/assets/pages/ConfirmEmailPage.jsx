@@ -18,7 +18,7 @@ function ConfirmEmailPage() {
         e.preventDefault();
         console.log('email: ' + localStorage.getItem('email'))
         try {
-            const response = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/verify_otp`, {
+            const response = await axios.post(`${import.meta.env.VITE_REACT_APP_URL}/verify_otp`, {
                 'email': localStorage.getItem('email'),
                 'otp': inputCode,
                 

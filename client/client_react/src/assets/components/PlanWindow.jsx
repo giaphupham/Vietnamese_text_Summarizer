@@ -9,7 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // the key is located in the .env file
-const stripePromise = loadStripe(import.meta.env.STRIPE);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE);
 
 
 

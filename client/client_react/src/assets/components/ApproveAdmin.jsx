@@ -33,7 +33,7 @@ const ApproveAdmin = () => {
   const handleConfirmModal = async () => {
     try {
 
-      const apiUrl = ConfirmType === 'delete' ? `${import.meta.env.VITE_REACT_APP_API_URL}/admin_delete_admin` : `${import.meta.env.REACT_APP_API_URL}/admin_approve_admin`;
+      const apiUrl = ConfirmType === 'delete' ? `${import.meta.env.VITE_REACT_APP_URL}/admin_delete_admin` : `${import.meta.env.REACT_APP_URL}/admin_approve_admin`;
       // Fetch admin's email and password from inputs and send the request
       await HttpClient.post(apiUrl, { 'username':username, 'password':password, 'admin':admin });
       // Handle success, maybe show a success message or redirect to another page

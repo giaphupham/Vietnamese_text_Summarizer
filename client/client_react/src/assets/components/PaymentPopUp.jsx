@@ -48,7 +48,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
 
   const sendUpgradeRequest = async (selectedPlan) => {
     try {
-      const response = await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/upgrade`, { plan: selectedPlan, user: localStorage.getItem('email')});
+      const response = await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/upgrade`, { plan: selectedPlan, user: localStorage.getItem('email')});
 
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
@@ -108,7 +108,7 @@ function Payment({isOpen, onClose, plan_id, price_id, planName, price}) {
           price_id: price_id,
         };
         // Otherwise send paymentMethod.id to your server
-        const res = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/sub`, payload);
+        const res = await axios.post(`${import.meta.env.VITE_REACT_APP_URL}/sub`, payload);
 
         // eslint-disable-next-line camelcase
         const {client_secret, status} = res.data;
