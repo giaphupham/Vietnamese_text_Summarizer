@@ -12,7 +12,7 @@ function HomePage() {
   const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
-        axios.get(`${import.meta.env.REACT_APP_API_URL}/home`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/home`, { withCredentials: true })
             .then(response => {
                 if (response.status === 200) {
                     console.log(response.data.message);

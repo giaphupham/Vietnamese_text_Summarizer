@@ -24,7 +24,7 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await HttpClient.get('http://127.0.0.1:5000/admin_get_users');
+      const response = await HttpClient.get(`${import.meta.env.VITE_REACT_APP_URL}/admin_get_users`);
       const sortedUsers = sortUsers(response.data, sortConfig.key, sortConfig.direction);
       setUsers(sortedUsers);
       setFilteredUsers(sortedUsers);

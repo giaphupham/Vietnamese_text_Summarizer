@@ -20,7 +20,7 @@ const AccountButton = () => {
   const handleLogout = () => {
     // Perform logout logic here
     // You can use axios to call your logout endpoint
-    HttpClient.get(`${import.meta.env.REACT_APP_API_URL}/logout`,{
+    HttpClient.get(`${import.meta.env.VITE_REACT_APP_API_URL}/logout`,{
     }) // Ensure that cookies are sent along with the request
       .then(response => {
         if (response.status === 200) {

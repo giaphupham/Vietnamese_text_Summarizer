@@ -53,7 +53,7 @@ const responseFacebook = async (res) => {
 const responseGoogle = async (response) => {
   const res = jwtDecode(response.credential);
     
-  await HttpClient.post(`${import.meta.env.REACT_APP_API_URL}/login_by_acc`, {      
+  await HttpClient.post(`${import.meta.env.VITE_REACT_APP_API_URL}/login_by_acc`, {      
       email: res.email,
       name: res.name,
       withCredentials: true,

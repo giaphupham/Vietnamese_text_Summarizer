@@ -70,7 +70,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
 
   useEffect(() => {
     // Fetch user login status from the backend or session
-    HttpClient.get('http://127.0.0.1:5000/status')
+    HttpClient.get(`${import.meta.env.VITE_REACT_APP_URL}/status`)
       .then(response => setLoggedIn(response.data['loggedIn']))
       .catch(error => console.error(error));
   }, []);
@@ -81,7 +81,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close}) => {
         return;
       }
 
-      const apiUrl = summarizeType === 'short' ? 'http://127.0.0.1:5000/summarize-short' : 'http://127.0.0.1:5000/summarize-long';
+      const apiUrl = summarizeType === 'short' ? `${import.meta.env.VITE_REACT_APP_URL}/summarize-short` : `${import.meta.env.VITE_REACT_APP_URL}/summarize-long`;
 
       setLoading(true);
       await HttpClient.post(apiUrl, {
