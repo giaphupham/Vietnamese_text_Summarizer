@@ -69,12 +69,12 @@ stripe_keys = {
 endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
 stripe.api_key = stripe_keys["secret_key"]
 YOUR_DOMAIN = 'http://127.0.0.1:5000'
-CLIENT_ORIGIN = 'http://localhost:5173' # https://vietnamese-text-summarizer.onrender.com/
+CLIENT_ORIGIN = 'https://vietnamesetextsummarizer.azurewebsites.net' # https://vietnamese-text-summarizer.onrender.com/
 
 
 CORS(app, supports_credentials=True, resources={
     r"/*": {
-        "origins": ["http://localhost:5173","http://localhost:5000", "https://vietnamese-text-summarizer.onrender.com"]
+        "origins": ["http://localhost:5173","http://localhost:5000","https://vietnamesetextsummarizer.azurewebsites.net", "https://vietnamese-text-summarizer.onrender.com"]
     }
 })
 bcrypt = Bcrypt(app)
@@ -272,15 +272,20 @@ def summerize_long():
         return jsonify({'error': 'Missing input text or number of sentences'}), 400
     username = session.get('user')
     
+    
     try:
-        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()    
-        print(dtb_result.data)                   
-        
-        max_words = 1500
-        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
-            max_words = 3000
-        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
-            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+        max_words = 700
+        if username!=None:
+            dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()    
+            print(dtb_result.data)                   
+            
+            max_words = 1500
+            subscription= dtb_result.data[0]["subscription"]
+            if(subscription != 0):
+                max_words = 3000
+
+            if(words_amount > max_words and (subscription==0 or dtb_result.data==[])):
+                return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
         
         summarizer, evaluate = load_model()
         result = summarizer.summarize(input_text, mode="lsa", keep_sentences= output_sentences)
@@ -332,13 +337,18 @@ def summerize_short():
     words_amount = len(input_text.split())
     username = session.get('user')
     try:
-        dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+        max_words = 700
+        if username!=None:
+            dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
+                    
+            max_words = 1500
+            subscription= dtb_result.data[0]["subscription"]
+            if(subscription != 0):
+                max_words = 3000
                 
-        max_words = 1500
-        if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
-            max_words = 3000
-        if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
-            return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+            if(words_amount > max_words and (subscription==0 or dtb_result.data==[])):
+                return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+            
         output_text = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
@@ -881,4 +891,4 @@ def change_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 if __name__ == "__main__":
     app.register_blueprint(swaggerui_blueprint)
-    app.run(debug=True) # , threaded=True)
+    app.run(debug=False) # , threaded=True)
