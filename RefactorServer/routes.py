@@ -165,6 +165,9 @@ def summerize():
 
     if not input_text:
         return jsonify({'error': 'Missing input text '}), 400
+    
+    if sentences> math.ceil(len(sent_tokenize(input_text))/2):
+        return jsonify({'error': 'Number of input sentences cannot be too large or equals 0.'}), 400
     username = session.get('user')
 
     try:
@@ -179,14 +182,18 @@ def summerize():
 
             if(words_amount > max_words and (subscription==0)):
                 return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-            
+
+        print("flag1")    
         output_text = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
+        print("flag2")    
+
         r, evaluate = load_model()
         score = evaluate.content_based(output_text, input_text)
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
+        print("flag3")    
 
         print(output_sentences, sentences)
         if output_sentences > sentences and sentences > 0:
