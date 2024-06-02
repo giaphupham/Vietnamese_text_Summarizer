@@ -78,7 +78,7 @@ const Users = () => {
 
   const handleUnbanUser = async (id) => {
     try {
-      await HttpClient.put(`${import.meta.env.REACT_APP_API_URL}/admin_unban_user`, { email: id });
+      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_unban_user`, { email: id });
       fetchUsers();
     } catch (error) {
       console.error(error);

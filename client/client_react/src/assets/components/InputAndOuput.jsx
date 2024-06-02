@@ -99,6 +99,9 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         setMaxWords(data['max-words']);
         setSummaryCount(prevCount => prevCount + 1);
         setScore(data['score']);
+        if (data['message'] === ''){
+            toast.error(data['message'], {autoClose: 3000})
+        }
       })
       .catch(error => {
         //console.log('catch ' + error.response.data.error)
