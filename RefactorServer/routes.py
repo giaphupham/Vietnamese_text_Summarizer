@@ -843,8 +843,8 @@ def login_and_register_by_3rd_party():
     user_email = user_.data[0]["email"]
     subscription = user_.data[0]["subscription"]
     if user_.data[0]['banned'] == 'Banned':
-            return jsonify({"error": "This account has been banned"}), 403
-    if user_email == []:
+        return jsonify({"error": "This account has been banned"}), 403
+    elif user_email == []:
         supabase.table('user').insert({"email": email, "password": "null", "name": name}).execute()
         session.permanent = True
         session['user'] = email
@@ -860,6 +860,8 @@ def login_and_register_by_3rd_party():
         session['summary_count'] = 3
         session['subscription'] = subscription
         return redirect(url_for('home'))
+    
+
 @app.route('/change_password', methods=['POST'])
 def change_password():
     data = request.json
