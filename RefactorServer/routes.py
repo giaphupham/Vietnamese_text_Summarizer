@@ -4,7 +4,6 @@ from datetime import timedelta, datetime, timezone
 from model_loader import load_model
 from model.abstract_model import summarizer
 from nltk.tokenize import sent_tokenize
-from werkzeug.utils import secure_filename
 from email.message import EmailMessage
 from dateutil.relativedelta import relativedelta
 import ssl
@@ -26,6 +25,7 @@ def add_security_headers(response):
 @app.route('/admin_ban_user', methods=['PUT'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_ban_user():
     try:
@@ -45,6 +45,7 @@ def admin_ban_user():
 @app.route('/admin_unban_user', methods=['PUT'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_unban_user():
     try:
@@ -62,6 +63,8 @@ def admin_unban_user():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/sub', methods=['POST'])
+@login_required
+@require_origin
 def sub():
     email = request.json.get('email', None)
     payment_method = request.json.get('payment_method', None)
@@ -126,6 +129,7 @@ def webhook():
         return 'Unexpected event type', 400
     return '', 200
 
+@require_origin
 @app.route('/status', methods=['GET'])
 def user_status():
     user_logged_in = session.get('logged_in')
@@ -173,8 +177,7 @@ def summerize():
     try:
         max_words = 700
         if username!=None:
-            # dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()                     
-            
+
             max_words = 1500
             subscription= session['subscription']
             if(subscription != 0):
@@ -194,16 +197,20 @@ def summerize():
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
 
+        msg_result=''
         if output_sentences > sentences and sentences > 0:
             result = r.summarize(output_text, mode="lsa", keep_sentences= sentences)
             output_text_new = result[0]
+        elif sentences == 0:
+            output_text_new = output_text
         else:
             output_text_new = output_text
+            msg_result='Your number of sentences you input cannot be too large'
         
         output_sentences_new = len(sent_tokenize(output_text_new))
         score = evaluate.content_based(output_text_new, input_text)
         return jsonify({
-            'message': 'Input text received successfully',
+            'message': msg_result,
             'output-text': output_text_new,
             'words': output_words,
             'sentences': output_sentences_new,
@@ -213,252 +220,10 @@ def summerize():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
-# @app.route('/summarize-long', methods=['POST'])
-# @update_last_access
-# @require_origin
-# def summerize_long():
-#     ts = time.time()
-#     current_time = datetime.fromtimestamp(ts, tz=None)
-#     if not request.json:
-#         return jsonify({'error': 'No JSON data received'}), 400
-
-
-#     if 'summary_count' not in session:
-#         session['summary_count'] = 0
-#         session['last_summary_time'] = current_time
-#     else:
-#         last_summary_time = session.get('last_summary_time', current_time)
-#         if current_time - last_summary_time >= timedelta(days=1):
-#             session['summary_count'] = 0
-#             session['last_summary_time'] = current_time
-#     if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-#         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
-#     elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
-#         return jsonify({'error': 'Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
-#     elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
-#         return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
-#     data = request.json
-#     input_text = data.get('input-text')
-#     words_amount = len(input_text.split())
-#     output_sentences = math.ceil(data.get('sentences') / 2)
-
-#     if not input_text or not output_sentences:
-#         return jsonify({'error': 'Missing input text or number of sentences'}), 400
-#     username = session.get('user')
-    
-    
-#     try:
-#         max_words = 700
-#         if username!=None:
-#             dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()    
-#             print(dtb_result.data)                   
-            
-#             max_words = 1500
-#             subscription= dtb_result.data[0]["subscription"]
-#             if(subscription != 0):
-#                 max_words = 3000
-
-#             if(words_amount > max_words and (subscription==0 or dtb_result.data==[])):
-#                 return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-        
-#         summarizer, evaluate = load_model()
-#         result = summarizer.summarize(input_text, mode="lsa", keep_sentences= output_sentences)
-#         output_text = result[0]
-#         score = evaluate.content_based(output_text, input_text)
-        
-#         output_words = len(output_text.split())
-#         output_sentences = output_text.count('.') + output_text.count('!') + output_text.count('?')
-#         + output_text.count(':') - 2* output_text.count('...')
-#         session['summary_count'] += 1
-#         session['last_summary_time'] = current_time
-#         print(session)
-#         return jsonify({
-#             'message': 'Input text received successfully',
-#             'output-text': output_text,
-#             'words': output_words,
-#             'sentences': output_sentences,
-#             'max-words': max_words,
-#             'score': round(score * 100)
-#         }), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-    
-
-# @app.route('/summarize-short', methods=['POST'])
-# @update_last_access
-# def summerize_short():
-    ts = time.time()
-    current_time = datetime.fromtimestamp(ts, tz=None)
-    if not request.json:
-        return jsonify({'error': 'No JSON data received'}), 400
-    
-    if 'summary_count' not in session:
-        session['summary_count'] = 0
-        session['last_summary_time'] = current_time
-    else:
-        last_summary_time = session.get('last_summary_time', current_time)
-        if current_time - last_summary_time >= timedelta(days=1):
-            session['summary_count'] = 0
-            session['last_summary_time'] = current_time
-    if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-        return jsonify({'error': 'Free summary limit reached. Please Login or Register.'}), 403
-    elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
-        return jsonify({'error': 'Free summary limit reached. Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
-    elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:
-        return jsonify({'error': 'Free summary limit reached. Pro summary limit reached. Please upgrade to Premium plan'}), 403
-    
-    print(session.get('user'))
-    data = request.json
-    input_text = data.get('input-text')
-    words_amount = len(input_text.split())
-    username = session.get('user')
-    try:
-        max_words = 700
-        if username!=None:
-            dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
-                    
-            max_words = 1500
-            subscription= dtb_result.data[0]["subscription"]
-            if(subscription != 0):
-                max_words = 3000
-                
-            if(words_amount > max_words and (subscription==0 or dtb_result.data==[])):
-                return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-            
-        output_text = summarizer(input_text)
-        output_words = len(output_text.split())
-        output_sentences = len(sent_tokenize(output_text))
-        r, evaluate = load_model()
-        score = evaluate.content_based(output_text, input_text)
-        session['summary_count'] += 1
-        session['last_summary_time'] = current_time
-        return jsonify({
-            'message': 'Input text received successfully',
-            'output-text': output_text,
-            'words': output_words,
-            'sentences': output_sentences,
-            'max-words': max_words,
-            'score': round(score * 100)
-            }), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-# @app.route('/summarize-number', methods=['POST'])
-# @update_last_access
-# def summarize_number():
-#     ts = time.time()
-#     current_time = datetime.datetime.fromtimestamp(ts, tz=None)
-#     if not request.json:
-#         return jsonify({'error': 'No JSON data received'}), 400
-    
-#     if 'summary_count' not in session:
-#         session['summary_count'] = 0
-#         session['last_summary_time'] = current_time
-#     else:
-#         last_summary_time = session.get('last_summary_time', current_time)
-#         if current_time - last_summary_time >= datetime.timedelta(days=1):
-#             session['summary_count'] = 0
-#             session['last_summary_time'] = current_time
-#     if not session.get('logged_in', False) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-#         return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
-    
-#     data = request.json
-#     input_text = data.get('input-text')
-#     output_sentences = data.get('sentences')
-#     words_amount = len(input_text.split())
-#     if not input_text or not output_sentences:
-#         return jsonify({'error': 'Missing input text or number of sentences'}), 400
-#     username = session.get('user')
-#     try:
-#         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
-                
-#         max_words = 1500
-#         if(dtb_result.data[0]["subscription"] != 0 and dtb_result.data[0]["subscription"] != []):
-#             max_words = 3000
-#         if(words_amount > max_words and (dtb_result.data[0]["subscription"]==0 or dtb_result.data==[])):
-#             return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-#         print("flag1")
-#         # Chia đoạn input thành các đoạn nhỏ
-#         input_chunks = sent_tokenize(input_text) # array các câu
-#         chunk_size = len(input_chunks) // output_sentences # số câu mỗi đoạn
-        
-#         # Tạo các đoạn input_segments tương ứng với số lượng output_sentences
-#         input_segments = [' '.join(input_chunks[i * chunk_size: (i + 1) * chunk_size]) 
-#                           for i in range(output_sentences)]
-        
-#         if len(input_segments) < output_sentences:
-#             input_segments.append(' '.join(input_chunks[output_sentences * chunk_size:]))
-        
-#         print(input_segments)
-#         with ThreadPoolExecutor(max_workers=output_sentences) as executor:
-#             results = list(executor.map(summarizer, input_segments))
-        
-#         print(results)
-#         output_text = ' '.join(results)
-#         print(output_text)
-#         output_words = len(output_text.split())
-#         session['summary_count'] += 1
-#         session['last_summary_time'] = current_time
-#         return jsonify({
-#             'message': 'Input text received successfully',
-#             'output-text': output_text,
-#             'words': output_words,
-#             'sentences': output_sentences,
-#             'max-words': max_words
-#         }), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-# @app.route('/summarize-claude', methods=['POST'])
-# @update_last_access
-# @login_required
-# def summerize_claude():
-#     if not request.json:
-#         return jsonify({'error': 'No JSON data received'}), 400
-    
-#     data = request.json
-#     input_text = data.get('input-text')
-#     sentences = data.get('sentences')
-
-#     if not input_text or not sentences:
-#         return jsonify({'error': 'Missing input text or number of sentences'}), 400
-#     username = session.get('user')
-#     if(sentences>= len(sent_tokenize(input_text))-2):
-#         return jsonify({'error':"Amount of output sentences cannot too big >= input sentences -2"})
-    
-#     # handle the response
-#     try:
-#         dtb_result = supabase.table('user').select('subscription').eq('email', username).execute()
-                
-#         subscription = dtb_result.data[0]["subscription"]
-#         if(subscription != 2):
-#             return jsonify({'error': 'Only level 2 subscription user can summarize using this tool'}), 403
-        
-#         message = client.messages.create(
-#             model="claude-3-haiku-20240307",
-#             max_tokens=1024,
-#             messages=[
-#                 {"role": "user", "content": "Tóm tắt văn bản sau thành chính xác "+ str(sentences) +" câu, đưa tôi trực tiếp văn bản đầu ra mà không cần câu dẫn dắt của AI: "+input_text}
-#             ]
-#         )
-#         summarizer, evaluate = load_model()
-#         output_text = message.content[0].text
-#         output_words = len(output_text.split())
-#         output_sentences = len(sent_tokenize(output_text))
-#         score = evaluate.content_based(output_text, input_text)
-#         return jsonify({
-#             'message': 'Input text received successfully',
-#             'output-text': output_text,
-#             'words': output_words,
-#             'sentences': output_sentences,
-#             'score': score
-#         }), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-    
 @app.route('/')
 @app.route('/home')
 @login_required
+@require_origin
 @update_last_access
 def home():
     return jsonify({'message': 'At home: Logged in successfully'}), 200
@@ -481,6 +246,7 @@ def register():
             return jsonify({'error': str(e)}), 500
   
 @app.route('/login', methods=['POST', 'GET'])
+@require_origin
 @update_last_access
 def login():
     
@@ -535,7 +301,10 @@ def log_out():
     session.pop('logged_in', None)
     session.pop('subscription', None)
     return redirect(url_for('login'))
+
+
 @app.route('/resetpassword', methods=['POST'])
+@require_origin
 def reset_password():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -552,7 +321,10 @@ def reset_password():
         
 def generate_otp():
     return secrets.token_hex(3)
+
+
 @app.route('/send_otp_email', methods=['POST'])
+@require_origin
 def send_otp_email():
     data = request.json
     email_receiver = data.get('email')
@@ -579,7 +351,10 @@ def send_otp_email():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
 @app.route('/verify_otp', methods=['POST'])
+@require_origin
 def verify_email():
     try:
         data = request.json
@@ -592,8 +367,11 @@ def verify_email():
             return jsonify({'message': 'Email verification successful!'}), 200
     except Exception as e:
         return jsonify({'error': 'Wrong OTP'}), 500
+    
+
 @app.route('/save-text', methods=['POST'])
 @login_required
+@require_origin
 def save_text():
     try:
         data = request.json
@@ -607,9 +385,11 @@ def save_text():
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved successfully"}), 200
 
+
 @app.route('/admin_get_users', methods=['GET'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_get_users():
     try:
@@ -626,6 +406,7 @@ def admin_get_users():
 @app.route('/admin_report_sales', methods=['GET'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_report_sales():
     try:
@@ -686,6 +467,7 @@ def verify_admin_password(admin_id, password):
 @app.route('/admin_delete_admin', methods=['POST'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_delete_admin():
     try:
@@ -721,6 +503,7 @@ def admin_delete_admin():
 @app.route('/admin_approve_admin', methods=['POST'])
 @login_required
 @admin_required
+@require_origin
 @update_last_access
 def admin_approve_admin():
     try:
@@ -743,6 +526,7 @@ def admin_approve_admin():
     
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
+@require_origin
 def profile():
     try:
         # print (session.get('user'))
@@ -756,8 +540,10 @@ def profile():
         return jsonify({'name':name, 'subscription': subscription, 'created_at': created_at}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
 @app.route('/feedback', methods=['POST','GET'])
 @login_required
+@require_origin
 def feedback():
     try:
         data = request.json
@@ -769,6 +555,8 @@ def feedback():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     return jsonify({'message':"Saved feedback successfully"}), 200
+
+
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -780,6 +568,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST']) # gửi value là file ng dùng up vào key 'file' trong json request
+@require_origin
 def upload_file():
     if 'file' not in request.files:
         return jsonify({"error": "No file in request"}), 400
@@ -796,6 +585,7 @@ def upload_file():
         return jsonify({"error": "Invalid file type"}), 400
 
 @app.route('/change_name', methods=['POST'])
+@require_origin
 def change_name():
     data = request.json
     email = data.get('email')
@@ -834,6 +624,7 @@ def upgrade_plan():
 
 
 @app.route('/login_by_acc', methods=['POST'])
+@require_origin
 def login_and_register_by_3rd_party():
     data = request.json
     email = data.get('email')
@@ -863,6 +654,7 @@ def login_and_register_by_3rd_party():
     
 
 @app.route('/change_password', methods=['POST'])
+@require_origin
 def change_password():
     data = request.json
     email = data.get('email')
@@ -873,6 +665,7 @@ def change_password():
     return jsonify({'message': 'Password changed successfully'}), 200
 
 @app.route('/notify_upgrade', methods=['POST'])
+@require_origin
 def notify_upgrade():
     data = request.json
     email = data.get('email')
