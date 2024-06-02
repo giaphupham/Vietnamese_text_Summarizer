@@ -54,7 +54,7 @@ function LoginPage() {
     })
     .catch(error => {
       console.log('catch ' + error.response.data.error)
-      toast.error('Login failed! Check your email and password again', {autoClose: 3000});
+      toast.error(error.response.data.error, {autoClose: 3000});
       setLoading(false);
     });
 
@@ -81,6 +81,7 @@ function LoginPage() {
 
   const responseGoogle = async (response) => {
     const res = jwtDecode(response.credential);
+    console.log(res);
       
     await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login_by_acc`, {      
         email: res.email,
