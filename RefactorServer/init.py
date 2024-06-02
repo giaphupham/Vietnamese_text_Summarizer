@@ -38,18 +38,17 @@ bcrypt = Bcrypt(app)
 user_info = {}
 stripe_keys = {
     "secret_key": os.getenv('STRIPE_SECRET_KEY'),
-    "publishable_key": os.getenv('STRIPE_PUBLISHABLE_KEY'),
-    "pro_plan_id" : os.getenv('STRIPE_PRO_PLAN_ID')
+    "publishable_key": os.getenv('STRIPE_PUBLISHABLE_KEY')
 }
 endpoint_secret = os.getenv('STRIPE_ENDPOINT_SECRET')
 stripe.api_key = stripe_keys["secret_key"]
 
 
 # require origin
-ALLOW_ORIGINS = ["http://localhost:5173","http://localhost:5000","https://vietnamesetextsummarizer.azurewebsites.net", "https://vietnamese-text-summarizer.onrender.com"]
+ALLOW_ORIGINS = ["http://localhost:5173","http://localhost:5000","https://vietnamesetextsummarizer.azurewebsites.net", "https://hcmusummarizer.azurewebsites.net"]
 CORS(app, supports_credentials=True, resources={
     r"/*": {
-        "origins": ["http://localhost:5173","http://localhost:5000","https://vietnamesetextsummarizer.azurewebsites.net", "https://vietnamese-text-summarizer.onrender.com"]
+        "origins": ["http://localhost:5173","http://localhost:5000","https://vietnamesetextsummarizer.azurewebsites.net", "https://hcmusummarizer.azurewebsites.net"]
     }
 })
 

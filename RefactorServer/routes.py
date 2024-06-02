@@ -64,7 +64,6 @@ def admin_unban_user():
 
 @app.route('/sub', methods=['POST'])
 @login_required
-@require_origin
 def sub():
     email = request.json.get('email', None)
     payment_method = request.json.get('payment_method', None)
