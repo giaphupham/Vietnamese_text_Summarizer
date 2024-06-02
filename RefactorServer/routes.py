@@ -2,7 +2,7 @@ from init import *
 from decorators import *
 from datetime import timedelta, datetime, timezone
 from model_loader import load_model
-from model.abstract_model import summarizer
+from RefactorServer.model.abstract_model import summarizer
 from nltk.tokenize import sent_tokenize
 from werkzeug.utils import secure_filename
 from email.message import EmailMessage
@@ -183,19 +183,17 @@ def summerize():
             if(words_amount > max_words and (subscription==0)):
                 return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
 
-        print("flag1")    
+
         output_text = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
-        print("flag2")    
+ 
 
         r, evaluate = load_model()
-        score = evaluate.content_based(output_text, input_text)
+        
         session['summary_count'] += 1
         session['last_summary_time'] = current_time
-        print("flag3")    
 
-        print(output_sentences, sentences)
         if output_sentences > sentences and sentences > 0:
             result = r.summarize(output_text, mode="lsa", keep_sentences= sentences)
             output_text_new = result[0]
@@ -203,6 +201,7 @@ def summerize():
             output_text_new = output_text
         
         output_sentences_new = len(sent_tokenize(output_text_new))
+        score = evaluate.content_based(output_text_new, input_text)
         return jsonify({
             'message': 'Input text received successfully',
             'output-text': output_text_new,
@@ -839,10 +838,12 @@ def login_and_register_by_3rd_party():
     data = request.json
     email = data.get('email')
     name = data.get('name')
-    user_ = supabase.table('user').select('email','role', 'subscription').eq('email', email).execute()
+    user_ = supabase.table('user').select('email','role', 'subscription', 'banned').eq('email', email).execute()
     role = user_.data[0]["role"]
     user_email = user_.data[0]["email"]
     subscription = user_.data[0]["subscription"]
+    if user_.data[0]['banned'] == 'Banned':
+            return jsonify({"error": "This account has been banned"}), 403
     if user_email == []:
         supabase.table('user').insert({"email": email, "password": "null", "name": name}).execute()
         session.permanent = True
