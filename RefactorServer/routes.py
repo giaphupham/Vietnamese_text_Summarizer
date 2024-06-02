@@ -2,7 +2,7 @@ from init import *
 from decorators import *
 from datetime import timedelta, datetime, timezone
 from model_loader import load_model
-from RefactorServer.model.abstract_model import summarizer
+from model.abstract_model import summarizer
 from nltk.tokenize import sent_tokenize
 from werkzeug.utils import secure_filename
 from email.message import EmailMessage
