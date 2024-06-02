@@ -228,6 +228,7 @@ def home():
     return jsonify({'message': 'At home: Logged in successfully'}), 200
 
 @app.route('/register', methods=['POST'])
+@require_origin
 def register():
     if not request.json:
         return jsonify({'error': 'No JSON data received'}), 400
@@ -277,7 +278,7 @@ def login():
                     session['subscription'] = subscription
 
                     if role == 'admin' or role == 's_admin':
-                        return jsonify(dtb_result.data[0])
+                        return jsonify({'user': username, "role":role})
                     else:
                         print("ở đây")
                         return redirect(url_for('home'))
