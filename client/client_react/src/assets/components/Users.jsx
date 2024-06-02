@@ -60,7 +60,7 @@ const Users = () => {
 
   const handleBanUser = async (id) => {
     try {
-      await HttpClient.put(`${import.meta.env.REACT_APP_API_URL}/admin_ban_user`, { email: id});
+      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_ban_user`, { email: id});
       fetchUsers();
     } catch (error) {
       if (error.response && error.response.status === 403) {
