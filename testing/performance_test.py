@@ -2,12 +2,12 @@ from locust import SequentialTaskSet, HttpUser, constant, task # locust 2.26.0
 import json, logging, sys
 
 
-class ShortSummarizer(SequentialTaskSet):
+class Summarizer(SequentialTaskSet):
 
     @task
     def login(self):
         data ={
-            'username':'nguyenphamkien15@gmail.com',
+            'username':'20120385@student.hcmus.edu.vn',
             'password':'123',
             'withCredentials':'true'
         }
@@ -19,7 +19,7 @@ class ShortSummarizer(SequentialTaskSet):
             'Content-Type': 'application/json',
             'Cookie': 'session=qW7Gqkdq9t4A3sz6zS94_ptTNKf8azc5Tp5bjh9NW8c',
             'Host': '127.0.0.1:5000', # replace this with hosted backend server
-            'Origin': 'https://vietnamese-text-summarizer.onrender.com',
+            'Origin': 'http://localhost:5173',
             'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
             'Sec-Ch-Ua-Mobile': '?0',
             'Sec-Ch-Ua-Platform': '"Windows"',
@@ -44,7 +44,7 @@ class ShortSummarizer(SequentialTaskSet):
             'Connection': 'close',
             'Cookie': 'session=qW7Gqkdq9t4A3sz6zS94_ptTNKf8azc5Tp5bjh9NW8c',
             'Host': '127.0.0.1:5000', # replace this with hosted backend server
-            'Origin': 'https://vietnamese-text-summarizer.onrender.com',
+            'Origin': 'http://localhost:5173',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         
         }
@@ -56,7 +56,7 @@ class ShortSummarizer(SequentialTaskSet):
             logging.error("Failed access home. Status code: %d" % response.status_code)
 
     @task
-    def summarize_short_mode(self):
+    def summarize(self):
 
         def read_file(file_path):
             try:
@@ -71,7 +71,7 @@ class ShortSummarizer(SequentialTaskSet):
         # print(text)
         data ={
             'input-text': text,
-            'sentences': 11, # 11 63
+            'sentences': 4,
             'withCredentials':'true'
         }
         headers = {
@@ -79,11 +79,11 @@ class ShortSummarizer(SequentialTaskSet):
             'Accept-Encoding': 'gzip, deflate, br, zstd',
             'Accept-Language': 'en-US,en;q=0.9',
             'Connection': 'keep-alive',
-            'Content-Length': '391',
+            'Content-Length': '3507',
             'Content-Type': 'application/json',
             'Cookie': 'session=qW7Gqkdq9t4A3sz6zS94_ptTNKf8azc5Tp5bjh9NW8c',
             'Host': '127.0.0.1:5000', # replace this with hosted backend server
-            'Origin': 'https://vietnamese-text-summarizer.onrender.com',
+            'Origin': 'https://localhost:5173',
             'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
             'Sec-Ch-Ua-Mobile': '?0',
             'Sec-Ch-Ua-Platform': '"Windows"',
@@ -93,18 +93,18 @@ class ShortSummarizer(SequentialTaskSet):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
         
-        response = self.client.post("/summarize-short", data=json.dumps(data), headers=headers) 
+        response = self.client.post("/summarize", data=json.dumps(data), headers=headers) 
 
         output_data = response.json()
         print(output_data.get('output-text'))
         if response.status_code == 200:
-            logging.info("Summarized short mode successfully!")
+            logging.info("Summarized long mode successfully!")
         else:
-            logging.error("Failed to summarize short mode. Status code: %d" % response.status_code)  
+            logging.error("Failed to summarize long mode. Status code: %d" % response.status_code)  
 
     
 
 class MyLoadTest(HttpUser):
-    host = "http://127.0.0.1:5000"
-    tasks = [ShortSummarizer]
+    host = "https://vietnamesetextsummarizer.azurewebsites.net"
+    tasks = [Summarizer]
     wait_time = constant(1)
