@@ -46,7 +46,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
 
   const countSentences = () => {
     // Split text into sentences based on period, exclamation mark, or question mark
-    const sentences = inputText.split(/[.!?]+/);
+    const sentences = inputText.split(/[\w|\)][.?!](\s|$)/g);
     // Filter out empty strings (e.g., consecutive punctuation marks)
     const filteredSentences = sentences.filter(sentence => sentence.trim() !== '');
     return filteredSentences.length;
@@ -99,7 +99,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         setMaxWords(data['max-words']);
         setSummaryCount(prevCount => prevCount + 1);
         setScore(data['score']);
-        if (data['message'] === ''){
+        if (data['message'] != ''){
             toast.error(data['message'], {autoClose: 3000})
         }
       })
@@ -133,17 +133,6 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-  // const handleFileUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       setInputText(event.target.result);
-  //     };
-  //     reader.readAsText(file);
-  //   }
-  // };
-
 
   return (
     <div className="h-96 flex flex-row flex-nowrap divide-x divide-slate-200 ">
@@ -158,7 +147,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         <div className='flex justify-between'>
           {isTextareaEmpty() ? (
             <FileInput />
-          ) : (<p className='p-4'>{countWords()} words / {maxWords} words</p>
+          ) : (<p className='p-4'>{countWords()} words / {maxWords} words | {countSentences()} sentences</p>
           )}
           <button
           className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full my-2 mx-6 w-40"

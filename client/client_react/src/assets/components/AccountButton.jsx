@@ -13,6 +13,8 @@ const AccountButton = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
+  const isAdmin = localStorage.getItem('role') === 'admin' || localStorage.getItem('role') === 's_admin' ? localStorage.getItem('role') : '';
+
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
   };
@@ -71,6 +73,15 @@ const AccountButton = () => {
             >
               Profile
             </a>
+            {isAdmin && (
+              <a
+                href="#"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => navigate('/Admin')}
+              >
+                Admin Page
+              </a>
+            )}
             <a
               href="#"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

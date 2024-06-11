@@ -184,7 +184,9 @@ def summerize():
 
             if(words_amount > max_words and (subscription==0)):
                 return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
-
+        else:
+            if(words_amount > max_words):
+                return jsonify({'error': 'Only user can summarize more than 700 words, please login'}), 403
 
         output_text = summarizer(input_text)
         output_words = len(output_text.split())
@@ -197,7 +199,7 @@ def summerize():
         session['last_summary_time'] = current_time
 
         msg_result=''
-        if output_sentences > sentences and sentences > 0:
+        if output_sentences >= sentences and sentences > 0:
             result = r.summarize(output_text, mode="lsa", keep_sentences= sentences)
             output_text_new = result[0]
         elif sentences == 0:
