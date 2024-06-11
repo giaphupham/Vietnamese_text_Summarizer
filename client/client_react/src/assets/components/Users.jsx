@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import HttpClient from './HttpClient';
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -59,12 +60,13 @@ const Users = () => {
   };
 
   const handleBanUser = async (id) => {
+    setErrorMessage('');
     try {
       await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_ban_user`, { email: id});
       fetchUsers();
     } catch (error) {
       if (error.response && error.response.status === 403) {
-        console.error(error.response.data.error);
+        // console.log(error.response.data.error);
         toast.error(error.response.data.error, {autoClose: 3000});
         setErrorMessage(error.response.data.error);
 
@@ -77,6 +79,7 @@ const Users = () => {
   };
 
   const handleUnbanUser = async (id) => {
+    setErrorMessage('');
     try {
       await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_unban_user`, { email: id });
       fetchUsers();
@@ -149,7 +152,7 @@ const Users = () => {
           </tbody>
         </table>
       </div>
-      <ToastContainer containerId={'containerC'}/>
+      <ToastContainer containerId={'User'}/>
     </div>
   );
 };

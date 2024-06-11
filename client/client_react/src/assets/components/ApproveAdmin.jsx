@@ -19,7 +19,7 @@ const ApproveAdmin = () => {
   };
 
   const handleDeleteAdmin = () => {
-    setConfirmType('delete');
+    setConfirmType('remove');
     setIsOpen(true); // Open the modal when the "Delete" button is clicked
   };
 
@@ -33,7 +33,7 @@ const ApproveAdmin = () => {
   const handleConfirmModal = async () => {
     try {
 
-      const apiUrl = ConfirmType === 'delete' ? `${import.meta.env.VITE_REACT_APP_URL}/admin_delete_admin` : `${import.meta.env.REACT_APP_URL}/admin_approve_admin`;
+      const apiUrl = ConfirmType === 'remove' ? `${import.meta.env.VITE_REACT_APP_URL}/admin_delete_admin` : `${import.meta.env.VITE_REACT_APP_URL}/admin_approve_admin`;
       // Fetch admin's email and password from inputs and send the request
       await HttpClient.post(apiUrl, { 'username':username, 'password':password, 'admin':admin });
       // Handle success, maybe show a success message or redirect to another page
@@ -41,24 +41,11 @@ const ApproveAdmin = () => {
     } catch (error) {
       setErrorMessage(error || 'Failed to approve admin');
     } finally {
-      toast.success(`Admin ${ConfirmType} successfully`);
+      //toast.success(`Admin ${ConfirmType} successfully`);
       setIsOpen(false); // Close the modal after the request is sent
     }
   };
 
-  // const handleDeleteAdmin = async (email) => {
-  //   if (role !== 's_admin') {
-  //     setErrorMessage('Only super admins can delete admins');
-  //     return;
-  //   }
-
-  //   try {
-  //     await axios.delete('http://127.0.0.1:5000/admin_delete_admin', {  'user_email': email, 'admin_email': admin, 'password': password });
-  //     // Handle success, maybe refresh the admin list or show a success message
-  //   } catch (error) {
-  //     setErrorMessage(error.response.data.error || 'Failed to delete admin');
-  //   }
-  // };
 
   return (
     <div>
@@ -81,7 +68,7 @@ const ApproveAdmin = () => {
             onClick={handleDeleteAdmin}
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"
           >
-            Delete
+            Remove
           </button>
           </div>
       ) : (<div>
@@ -94,7 +81,7 @@ const ApproveAdmin = () => {
         errorMessage={errorMessage}
         setPassword={setPassword}
       />
-      <ToastContainer containerId={'containerA'} />
+      <ToastContainer containerId={'containerE'} />
     </div>
   );
 };

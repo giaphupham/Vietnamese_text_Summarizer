@@ -37,6 +37,9 @@ def admin_ban_user():
         if not user_response.data or user_response.data[0]['role'] == 's_admin':
             return jsonify({"error": "Cannot ban super admin"}), 403
         
+        if user_id == session.get('user'):
+            return jsonify({"error": "Cannot ban yourself"}), 403
+        
         response = supabase.table('user').update({"banned": 'Banned'}).eq('email', user_id).execute()
         return jsonify(response.data), 200
     except Exception as e:
