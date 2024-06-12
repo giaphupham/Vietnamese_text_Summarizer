@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FileInput from './FileInput';
-import axios from 'axios';
 import copy from 'clipboard-copy';
 import { FaRegCopy } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
-import Notification from './NotiWindow';
 import { IoMdCloudDownload } from "react-icons/io";
 import HttpClient from './HttpClient';
 import FeedbackWindow from "./FeedbackWindow";
@@ -12,7 +10,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UpgradePopUp from './UpgradePopUp';
 
-const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) => {
+const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -128,10 +126,10 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
   };
 
   return (
-    <div className="h-96 flex flex-row flex-nowrap divide-x divide-slate-200 ">
+    <div className="md:h-96 flex md:flex-row flex-nowrap divide-x divide-slate-200 flex-col">
       <div className="flex-1">
         <textarea
-          className="w-full h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
+          className="w-full h-64 md:h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
           type='text'
           value={inputText}
           placeholder='Enter or paste your text and press &quot;Summarize.&quot;'
@@ -162,7 +160,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
       <div className="flex-1">
         <textarea
           ref={textAreaRef}
-          className="w-full h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
+          className="w-full h-64 md:h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
           value={outputText}
           readOnly
         />

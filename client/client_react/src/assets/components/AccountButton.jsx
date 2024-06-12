@@ -49,7 +49,7 @@ const AccountButton = () => {
   return (
     <div className="flex flex-wrap content-center items-center">
       <button 
-        className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
+        className="bg-[#178733] mx-2 px-2 md:px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
         onClick={() => navigate('/premium')}
       >
         <FontAwesomeIcon icon={faGem} className='text-white '  />
