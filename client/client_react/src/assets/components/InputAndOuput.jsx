@@ -15,7 +15,6 @@ import UpgradePopUp from './UpgradePopUp';
 const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
-  const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sentences, setSentences] = useState(0);
   const [words, setWords] = useState(0);
@@ -33,13 +32,9 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
       
       if (textToCopy) {
         copy(textToCopy);
-        setShowNotification(true);
-        // Automatically close the notification after 3 seconds
-        setTimeout(() => {
-          setShowNotification(false);
-        }, 3000);
+        toast.success('Text copied to clipboard!', {autoClose: 3000});
       } else {
-        setShowNotification(true);
+        toast.error('No text to copy!', {autoClose: 3000});
       }
     }
   };
@@ -56,9 +51,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
     const words = inputText.split(/\s+/); // split by spaces
     return words.filter(word => word.trim() !== '').length; // filter out empty strings
   };
-  const handleNotificationClose = () => {
-    setShowNotification(false);
-  };
+
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
@@ -187,16 +180,6 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
           >
             <FaRegCopy />
           </button>
-          {showNotification && (
-            <Notification
-              message={
-                outputText
-                  ? 'Text copied to clipboard!'
-                  : 'No text to copy!'
-              }
-              onClose={handleNotificationClose}
-            />
-          )}
           <div className="mx-2">
             <button
             className='hover:bg-gray-200 p-2 rounded-full'

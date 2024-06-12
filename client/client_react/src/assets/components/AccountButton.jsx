@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { VscAccount } from "react-icons/vsc";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGem} from '@fortawesome/free-regular-svg-icons'

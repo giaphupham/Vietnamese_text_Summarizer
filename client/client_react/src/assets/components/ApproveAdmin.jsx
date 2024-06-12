@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import Modal from './ConfirmModal';
 import HttpClient from './HttpClient';
 import { ToastContainer, toast } from 'react-toastify';

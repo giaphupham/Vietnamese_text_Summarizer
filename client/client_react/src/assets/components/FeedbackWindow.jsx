@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import ReactStars from "react-rating-stars-component";
-import axios from 'axios';
 import HttpClient from './HttpClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -86,6 +85,7 @@ const FeedbackWindow = ({ onClose }) => {
           </div>
         </form>
       </div>
+      <ToastContainer containerId={'Feedback'}/>
     </div>
   );
 };
