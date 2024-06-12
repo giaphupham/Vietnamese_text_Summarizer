@@ -71,7 +71,12 @@ function LoginPage() {
     }).then(response => {
       console.log('then' + response.data)
       localStorage.setItem('email', res.email);
-      navigate({ pathname: '/' })
+      localStorage.setItem('role', response.data.role)
+      if (response.data.role === 'admin' || response.data.role === 's_admin') {
+        navigate({ pathname: '/Admin' })
+      } else {
+        navigate({ pathname: '/' })
+      }
     }).catch(error => {
       console.log('catch ' + error)
       toast.error('Login failed! Please try again', {autoClose: 3000});
@@ -90,7 +95,12 @@ function LoginPage() {
     }).then(response => {
       console.log('then' + response.data)
       localStorage.setItem('email', res.email);
-      navigate({ pathname: '/' })
+      localStorage.setItem('role', response.data.role)
+      if (response.data.role === 'admin' || response.data.role === 's_admin') {
+        navigate({ pathname: '/Admin' })
+      } else {
+        navigate({ pathname: '/' })
+      }
     }).catch(error => {
       console.log('catch ' + error)
       toast.error(error.response.data.error, {autoClose: 3000});
