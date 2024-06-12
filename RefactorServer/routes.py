@@ -248,7 +248,7 @@ def register():
             supabase.table('user').insert({"email": username, "password": hashed_password, "name": name}).execute()
             return jsonify({'message': 'User created successfully'}), 200
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'error': str(e), 'code': str(e.code)}), 500
   
 @app.route('/login', methods=['POST', 'GET'])
 @require_origin
@@ -285,7 +285,6 @@ def login():
                     if role == 'admin' or role == 's_admin':
                         return jsonify({'user': username, "role":role})
                     else:
-                        print("ở đây")
                         return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
@@ -647,7 +646,10 @@ def login_and_register_by_3rd_party():
         session['role'] = role
         session['logged_in'] = True
         session['summary_count'] = 3
-        return redirect(url_for('home'))
+        if role == 'admin' or role == 's_admin':
+            return jsonify({'user': email, "role":role})
+        else:
+            return redirect(url_for('home'))
     else:
         session.permanent = True
         session['user'] = email
@@ -655,7 +657,10 @@ def login_and_register_by_3rd_party():
         session['logged_in'] = True
         session['summary_count'] = 3
         session['subscription'] = subscription
-        return redirect(url_for('home'))
+        if role == 'admin' or role == 's_admin':
+            return jsonify({'user': email, "role":role})
+        else:
+            return redirect(url_for('home'))
     
 
 @app.route('/change_password', methods=['POST'])
