@@ -65,7 +65,7 @@ const PlanWindow = ({ plan }) => {
 
   return (
     <Elements stripe={stripePromise}>
-      <div className="p-6 border border-[#178733] rounded-lg shadow-lg bg-white mx-4">
+      <div className="p-6 border border-[#178733] rounded-lg shadow-lg bg-white mx-4 w-1/3">
         <h2 className="text-xl font-semibold text-center mb-2">{plan.name}</h2>
         {plan.plans  ? (
           <button className="w-full my-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-full" disabled>Current Plan</button>
