@@ -191,10 +191,10 @@ def summerize():
             if(words_amount > max_words):
                 return jsonify({'error': 'Only user can summarize more than 700 words, please login'}), 403
 
-        output_text = summarizer(input_text)
+        output_text, num_token = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
- 
+        print(num_token)
 
         r, evaluate = load_model()
         
@@ -606,12 +606,13 @@ def upgrade_plan():
     plan = data.get('plan')
     user = data.get('user') 
 
-    print(plan, user)
     # Calculate the start day and end day
     start_day = datetime.now(timezone.utc)
     end_day = start_day + timedelta(days=30)
 
     try:
+        supabase.table('subscriptions').update({'status': 'none'}).eq('user_email', user).execute()
+
         supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
         supabase.table('subscriptions').insert({
             'user_email': user,

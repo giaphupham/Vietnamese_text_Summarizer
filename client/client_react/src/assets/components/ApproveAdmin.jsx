@@ -3,6 +3,7 @@ import Modal from './ConfirmModal';
 import HttpClient from './HttpClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { set } from 'date-fns';
 
 const ApproveAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,19 +31,21 @@ const ApproveAdmin = () => {
   const role = localStorage.getItem('role');
 
   const handleConfirmModal = async () => {
-    try {
 
-      const apiUrl = ConfirmType === 'remove' ? `${import.meta.env.VITE_REACT_APP_URL}/admin_delete_admin` : `${import.meta.env.VITE_REACT_APP_URL}/admin_approve_admin`;
-      // Fetch admin's email and password from inputs and send the request
-      await HttpClient.post(apiUrl, { 'username':username, 'password':password, 'admin':admin });
-      // Handle success, maybe show a success message or redirect to another page
-      toast.success(`Admin ${ConfirmType} successfully`);
-    } catch (error) {
-      setErrorMessage(error || 'Failed to approve admin');
-    } finally {
-      //toast.success(`Admin ${ConfirmType} successfully`);
-      setIsOpen(false); // Close the modal after the request is sent
+    const apiUrl = ConfirmType === 'remove' ? `${import.meta.env.VITE_REACT_APP_URL}/admin_delete_admin` : `${import.meta.env.VITE_REACT_APP_URL}/admin_approve_admin`;
+    // Fetch admin's email and password from inputs and send the request
+    await HttpClient.post(apiUrl, { 'username':username, 'password':password, 'admin':admin }
+
+    ).then(response => {
+    // Handle success, maybe show a success message or redirect to another page
+      setIsOpen(false);
+      toast.success(`Admin ${ConfirmType} successfully`, {autoClose: 3000, containerId: 'containerE'});
+
     }
+    ).catch(error => {
+      setIsOpen(false);
+      toast.error(error.response.data.error, {autoClose: 3000, containerId: 'containerE'});
+    });
   };
 
 

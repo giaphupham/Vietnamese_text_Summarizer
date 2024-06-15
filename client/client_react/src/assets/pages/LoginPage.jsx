@@ -79,7 +79,7 @@ function LoginPage() {
       }
     }).catch(error => {
       console.log('catch ' + error)
-      toast.error('Login failed! Please try again', {autoClose: 3000});
+      toast.error(error.response.data.error, {autoClose: 3000});
       setLoading(false);
     });
   };

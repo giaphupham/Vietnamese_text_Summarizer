@@ -61,32 +61,44 @@ const Users = () => {
 
   const handleBanUser = async (id) => {
     setErrorMessage('');
-    try {
-      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_ban_user`, { email: id});
+      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_ban_user`, { email: id})
+      .then(response => {
+        toast.success('User banned successfully', {autoClose: 3000, containerId: 'User'});
+      }).catch(error => {
+        if (error.response && error.response.status === 403) {
+          // console.log(error.response.data.error);
+          toast.error(error.response.data.error, {autoClose: 3000, containerId: 'User'});
+          setErrorMessage(error.response.data.error);
+  
+        } else {
+          console.error(error);
+          toast.error('Failed to ban user', {autoClose: 3000, containerId: 'User'});
+  
+        }
+      });
       fetchUsers();
-    } catch (error) {
-      if (error.response && error.response.status === 403) {
-        // console.log(error.response.data.error);
-        toast.error(error.response.data.error, {autoClose: 3000});
-        setErrorMessage(error.response.data.error);
 
-      } else {
-        console.error(error);
-        toast.error('Failed to ban user');
-
-      }
-    }
-  };
+    };
 
   const handleUnbanUser = async (id) => {
     setErrorMessage('');
-    try {
-      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_unban_user`, { email: id });
+      await HttpClient.put(`${import.meta.env.VITE_REACT_APP_URL}/admin_unban_user`, { email: id })
+      .then(response => {
+        toast.success('User unbanned successfully', {autoClose: 3000, containerId: 'User'});
+      }).catch(error => {
+        if (error.response && error.response.status === 403) {
+          // console.log(error.response.data.error);
+          toast.error(error.response.data.error, {autoClose: 3000, containerId: 'User'});
+          setErrorMessage(error.response.data.error);
+  
+        } else {
+          console.error(error);
+          toast.error('Failed to ban user', {autoClose: 3000, containerId: 'User'});
+  
+        }
+      });
       fetchUsers();
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to unban user');
-    }
+
   };
 
   return (
