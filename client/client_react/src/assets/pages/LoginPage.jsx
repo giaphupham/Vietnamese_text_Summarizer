@@ -130,10 +130,10 @@ function LoginPage() {
     <div>
         <NavBar isLogin={false} />
 
-        <div className="grid grid-cols-1 justify-items-center pt-10">
+        <div className="flex flex-col items-center pt-10">
           <b className="text-xl font-medium">Log in to your VietnameseTextSummarizer account</b>
           <Form
-            formClass="w-1/4 md:mx-36 xl:mx-80 mx-auto drop-shadow mt-6"
+            formClass=" mx-auto drop-shadow mt-6"
             onSubmit={handleLogin}
           >
             <div className="flex flex-col mb-6 justify-center">
