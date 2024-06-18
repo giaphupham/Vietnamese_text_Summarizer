@@ -1,2 +1,0 @@
-Method,Name,Error,Occurrences
-POST,/summarize-long,HTTPError('500 Server Error: INTERNAL SERVER ERROR for url: /summarize-long'),1
