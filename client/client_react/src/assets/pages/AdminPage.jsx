@@ -3,13 +3,32 @@ import Users from '../components/Users';
 import SalesReport from '../components/SaleReport';
 import ApproveAdmin from '../components/ApproveAdmin';
 import NavBar from '../components/NavBar';
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios';
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState('users');
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_REACT_APP_URL}/home`, { withCredentials: true })
+        .then(response => {
+            if (response.status === 200) {
+                console.log(response.data.message);
+            } else {
+                throw new Error('You have to log in first');
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            // Redirect to login page
+            navigate('/Login');
+        });
+  },[]);
 
   return (
     <div>
-    <NavBar />
+    <NavBar isLogin={true}/>
     <div className='pt-4 mx-4'>
       <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       <nav className="mb-4">

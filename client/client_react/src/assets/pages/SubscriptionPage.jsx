@@ -68,7 +68,7 @@ const SubscriptionPage = () => {
       <NavBar />
       <h1 className="text-4xl text-center font-bold mt-4 text-[#178733]">Choose a plan</h1>
     <div className="flex justify-center items-center my-16">
-      <div className="flex justify-between">
+      <div className="md:flex justify-between">
           <PlanWindow plan={{
             plans: getSubscriptionType(plans) === 'Free',
             id:0,
