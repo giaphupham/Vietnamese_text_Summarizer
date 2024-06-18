@@ -37,6 +37,9 @@ def admin_ban_user():
         if not user_response.data or user_response.data[0]['role'] == 's_admin':
             return jsonify({"error": "Cannot ban super admin"}), 403
         
+        if user_id == session.get('user'):
+            return jsonify({"error": "Cannot ban yourself"}), 403
+        
         response = supabase.table('user').update({"banned": 'Banned'}).eq('email', user_id).execute()
         return jsonify(response.data), 200
     except Exception as e:
@@ -184,12 +187,14 @@ def summerize():
 
             if(words_amount > max_words and (subscription==0)):
                 return jsonify({'error': 'Only subscription user can summarize more than 1500 words'}), 403
+        else:
+            if(words_amount > max_words):
+                return jsonify({'error': 'Only user can summarize more than 700 words, please login'}), 403
 
-
-        output_text = summarizer(input_text)
+        output_text, num_token = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
- 
+        print(num_token)
 
         r, evaluate = load_model()
         
@@ -197,7 +202,7 @@ def summerize():
         session['last_summary_time'] = current_time
 
         msg_result=''
-        if output_sentences > sentences and sentences > 0:
+        if output_sentences >= sentences and sentences > 0:
             result = r.summarize(output_text, mode="lsa", keep_sentences= sentences)
             output_text_new = result[0]
         elif sentences == 0:
@@ -243,7 +248,7 @@ def register():
             supabase.table('user').insert({"email": username, "password": hashed_password, "name": name}).execute()
             return jsonify({'message': 'User created successfully'}), 200
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'error': str(e), 'code': str(e.code)}), 500
   
 @app.route('/login', methods=['POST', 'GET'])
 @require_origin
@@ -280,7 +285,6 @@ def login():
                     if role == 'admin' or role == 's_admin':
                         return jsonify({'user': username, "role":role})
                     else:
-                        print("ở đây")
                         return redirect(url_for('home'))
                 else:
                     return jsonify({'error': 'Wrong username or password'}), 401
@@ -602,12 +606,13 @@ def upgrade_plan():
     plan = data.get('plan')
     user = data.get('user') 
 
-    print(plan, user)
     # Calculate the start day and end day
     start_day = datetime.now(timezone.utc)
     end_day = start_day + timedelta(days=30)
 
     try:
+        supabase.table('subscriptions').update({'status': 'none'}).eq('user_email', user).execute()
+
         supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
         supabase.table('subscriptions').insert({
             'user_email': user,
@@ -642,7 +647,10 @@ def login_and_register_by_3rd_party():
         session['role'] = role
         session['logged_in'] = True
         session['summary_count'] = 3
-        return redirect(url_for('home'))
+        if role == 'admin' or role == 's_admin':
+            return jsonify({'user': email, "role":role})
+        else:
+            return redirect(url_for('home'))
     else:
         session.permanent = True
         session['user'] = email
@@ -650,7 +658,10 @@ def login_and_register_by_3rd_party():
         session['logged_in'] = True
         session['summary_count'] = 3
         session['subscription'] = subscription
-        return redirect(url_for('home'))
+        if role == 'admin' or role == 's_admin':
+            return jsonify({'user': email, "role":role})
+        else:
+            return redirect(url_for('home'))
     
 
 @app.route('/change_password', methods=['POST'])

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { VscAccount } from "react-icons/vsc";
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGem} from '@fortawesome/free-regular-svg-icons'
@@ -12,6 +11,8 @@ import HttpClient from './HttpClient';
 const AccountButton = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+
+  const isAdmin = localStorage.getItem('role') === 'admin' || localStorage.getItem('role') === 's_admin' ? localStorage.getItem('role') : '';
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
@@ -48,7 +49,7 @@ const AccountButton = () => {
   return (
     <div className="flex flex-wrap content-center items-center">
       <button 
-        className="bg-[#178733] mx-2 px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
+        className="bg-[#178733] mx-2 px-2 md:px-10 py-1.5 rounded-full flex flex-wrap items-center hover:bg-[#0B6722]"
         onClick={() => navigate('/premium')}
       >
         <FontAwesomeIcon icon={faGem} className='text-white '  />
@@ -71,6 +72,15 @@ const AccountButton = () => {
             >
               Profile
             </a>
+            {isAdmin && (
+              <a
+                href="#"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => navigate('/Admin')}
+              >
+                Admin Page
+              </a>
+            )}
             <a
               href="#"
               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

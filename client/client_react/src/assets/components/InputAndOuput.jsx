@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FileInput from './FileInput';
-import axios from 'axios';
 import copy from 'clipboard-copy';
 import { FaRegCopy } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
-import Notification from './NotiWindow';
 import { IoMdCloudDownload } from "react-icons/io";
 import HttpClient from './HttpClient';
 import FeedbackWindow from "./FeedbackWindow";
@@ -12,10 +10,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UpgradePopUp from './UpgradePopUp';
 
-const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) => {
+const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
-  const [showNotification, setShowNotification] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sentences, setSentences] = useState(0);
   const [words, setWords] = useState(0);
@@ -33,20 +30,16 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
       
       if (textToCopy) {
         copy(textToCopy);
-        setShowNotification(true);
-        // Automatically close the notification after 3 seconds
-        setTimeout(() => {
-          setShowNotification(false);
-        }, 3000);
+        toast.success('Text copied to clipboard!', {autoClose: 3000});
       } else {
-        setShowNotification(true);
+        toast.error('No text to copy!', {autoClose: 3000});
       }
     }
   };
 
   const countSentences = () => {
     // Split text into sentences based on period, exclamation mark, or question mark
-    const sentences = inputText.split(/[.!?]+/);
+    const sentences = inputText.split(/[\w|\)][.?!](\s|$)/g);
     // Filter out empty strings (e.g., consecutive punctuation marks)
     const filteredSentences = sentences.filter(sentence => sentence.trim() !== '');
     return filteredSentences.length;
@@ -56,9 +49,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
     const words = inputText.split(/\s+/); // split by spaces
     return words.filter(word => word.trim() !== '').length; // filter out empty strings
   };
-  const handleNotificationClose = () => {
-    setShowNotification(false);
-  };
+
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
@@ -99,7 +90,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         setMaxWords(data['max-words']);
         setSummaryCount(prevCount => prevCount + 1);
         setScore(data['score']);
-        if (data['message'] === ''){
+        if (data['message'] != ''){
             toast.error(data['message'], {autoClose: 3000})
         }
       })
@@ -133,23 +124,12 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-  // const handleFileUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = (event) => {
-  //       setInputText(event.target.result);
-  //     };
-  //     reader.readAsText(file);
-  //   }
-  // };
-
 
   return (
-    <div className="h-96 flex flex-row flex-nowrap divide-x divide-slate-200 ">
+    <div className="md:h-96 flex md:flex-row flex-nowrap divide-x divide-slate-200 flex-col">
       <div className="flex-1">
         <textarea
-          className="w-full h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
+          className="w-full h-64 md:h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
           type='text'
           value={inputText}
           placeholder='Enter or paste your text and press &quot;Summarize.&quot;'
@@ -158,7 +138,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
         <div className='flex justify-between'>
           {isTextareaEmpty() ? (
             <FileInput />
-          ) : (<p className='p-4'>{countWords()} words / {maxWords} words</p>
+          ) : (<p className='p-4'>{countWords()} words / {maxWords} words | {countSentences()} sentences</p>
           )}
           <button
           className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full my-2 mx-6 w-40"
@@ -180,7 +160,7 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
       <div className="flex-1">
         <textarea
           ref={textAreaRef}
-          className="w-full h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
+          className="w-full h-64 md:h-5/6 p-4 focus:outline-none focus:ring-0 resize-none "
           value={outputText}
           readOnly
         />
@@ -198,16 +178,6 @@ const InputAndOutput = ({summarizeType, showFeedback, Close, numberSentences}) =
           >
             <FaRegCopy />
           </button>
-          {showNotification && (
-            <Notification
-              message={
-                outputText
-                  ? 'Text copied to clipboard!'
-                  : 'No text to copy!'
-              }
-              onClose={handleNotificationClose}
-            />
-          )}
           <div className="mx-2">
             <button
             className='hover:bg-gray-200 p-2 rounded-full'

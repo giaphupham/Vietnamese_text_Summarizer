@@ -27,8 +27,13 @@ function RegisterPage() {
       navigate({ pathname: '/confirm-email' })
     })
     .catch(error => {
-        console.log('catch ' + error)
-        toast.error('Register failed! Please try again', {autoClose: 3000});
+        console.log(error.response.data.code)
+        if (error.response.data.code == 23505) {
+            toast.error('Email already exists', {autoClose: 3000});
+        }
+        else{
+          toast.error('Register failed! Please try again', {autoClose: 3000});
+        }
         setLoading(false);
     });
   };

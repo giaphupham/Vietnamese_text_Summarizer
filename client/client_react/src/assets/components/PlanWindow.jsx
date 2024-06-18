@@ -1,6 +1,5 @@
-import React, {useEffect, useState}from "react";
-import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import React, { useState}from "react";
+
 import PaymentPopUp from './PaymentPopUp';
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
@@ -65,7 +64,7 @@ const PlanWindow = ({ plan }) => {
 
   return (
     <Elements stripe={stripePromise}>
-      <div className="p-6 border border-[#178733] rounded-lg shadow-lg bg-white mx-4">
+      <div className="p-6 border border-[#178733] rounded-lg shadow-lg bg-white my-4 md:mx-4 md:w-1/3 w-full">
         <h2 className="text-xl font-semibold text-center mb-2">{plan.name}</h2>
         {plan.plans  ? (
           <button className="w-full my-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-full" disabled>Current Plan</button>

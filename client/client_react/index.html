@@ -4,30 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdzudI_QWz711Vlo_5eYPVjKMm2Pu6_Y8w0av1jRQjQw&s" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./dist/output.css" rel="stylesheet">
     <title>Vietnamese Text Summarizer</title>
 
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
-    <script>
-      window.fbAsyncInit = function() {
-        FB.init({
-          appId      : '7945089925544136',
-          xfbml      : true,
-          version    : 'v19.0'
-        });
-        FB.AppEvents.logPageView();
-      };
-    
-      (function(d, s, id){
-         var js, fjs = d.getElementsByTagName(s)[0];
-         if (d.getElementById(id)) {return;}
-         js = d.createElement(s); js.id = id;
-         js.src = "https://connect.facebook.net/en_US/sdk.js";
-         fjs.parentNode.insertBefore(js, fjs);
-       }(document, 'script', 'facebook-jssdk'));
-    </script>
   </body>
 </html>
