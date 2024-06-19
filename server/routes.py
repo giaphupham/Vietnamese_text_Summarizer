@@ -167,7 +167,7 @@ def summerize():
     data = request.json
     input_text = data.get('input-text')
     words_amount = len(input_text.split())
-    sentences = int(data.get('sentences'))
+    sentences = int(data.get('sentences'))  
 
     if not input_text:
         return jsonify({'error': 'Missing input text '}), 400
@@ -191,10 +191,10 @@ def summerize():
             if(words_amount > max_words):
                 return jsonify({'error': 'Only user can summarize more than 700 words, please login'}), 403
 
-        output_text, num_token = summarizer(input_text)
+        output_text = summarizer(input_text)
         output_words = len(output_text.split())
         output_sentences = len(sent_tokenize(output_text))
-        print(num_token)
+    
 
         r, evaluate = load_model()
         
