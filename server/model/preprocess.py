@@ -1,5 +1,4 @@
 import numpy as np
-# from underthesea import word_tokenize
 from nltk import sent_tokenize
 from gensim.utils import simple_preprocess
 from pyvi.ViTokenizer import tokenize as word_tokenize
