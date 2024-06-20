@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-// MUI Components
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-// Util imports
+import CircularProgress from '@material-ui/core/CircularProgress'; // Import CircularProgress
 import { makeStyles } from '@material-ui/core/styles';
-// Components
 import CardInput from '../components/CardInput';
-// Stripe
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import HttpClient from './HttpClient';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 const useStyles = makeStyles({
   root: {
@@ -40,6 +36,7 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
   const classes = useStyles();
   const [status, setStatus] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const stripe = useStripe();
   const elements = useElements();
@@ -53,7 +50,6 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
         toast.success('Upgrade successfully', { autoClose: 3000 });
-        // You can add further actions here if needed
       } else {
         console.error('Failed to send upgrade request');
         toast.error('Failed to send upgrade request', { autoClose: 3000 });
@@ -64,9 +60,9 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
   };
 
   const handleSubmitSub = async (event) => {
+    setLoading(true); // Set loading state to true when the button is clicked
     if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
+      setLoading(false); // Reset loading state if Stripe.js has not loaded
       return;
     }
     if (status !== '') {
@@ -80,14 +76,11 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
       });
       if (result.error) {
         console.log(result.error.message);
-        // Show error in payment form
+        setLoading(false); // Reset loading state on error
       } else {
-        console.log('Hell yea, you got that sub money!');
-        console.log(plan_id);
         sendUpgradeRequest(plan_id);
         toast.success('Payment successful', { autoClose: 3000 });
         window.location.reload();
-
       }
     } else {
       const result = await stripe.createPaymentMethod({
@@ -100,17 +93,15 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
 
       if (result.error) {
         console.log(result.error.message);
-        // Show error in payment form
+        setLoading(false); // Reset loading state on error
       } else {
         const payload = {
           email: email,
           payment_method: result.paymentMethod.id,
           price_id: price_id,
         };
-        // Otherwise send paymentMethod.id to your server
         const res = await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/sub`, payload);
 
-        // eslint-disable-next-line camelcase
         const { client_secret, status } = res.data;
 
         if (status === 'requires_action') {
@@ -118,21 +109,15 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
           setClientSecret(client_secret);
           stripe.confirmCardPayment(client_secret).then(function (result) {
             if (result.error) {
-              // Display error message in your UI.
-              // The card was declined (i.e. insufficient funds, card has expired, etc)
               console.log(result.error.message);
+              setLoading(false); // Reset loading state on error
             } else {
-              // Show a success message to your customer
-              console.log('Hell yea, you got that sub money!');
-              console.log(plan_id);
               sendUpgradeRequest(plan_id);
               toast.success('Payment successful', { autoClose: 3000 });
               window.location.reload();
             }
           });
         } else {
-          console.log('Hell yea, you got that sub money!');
-          console.log(plan_id);
           sendUpgradeRequest(plan_id);
           toast.success('Payment successful', { autoClose: 3000 });
           window.location.reload();
@@ -142,7 +127,6 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
   };
 
   return (
-
     <div className={`${isOpen ? 'block' : 'hidden'} fixed inset-0 z-50 overflow-auto bg-gray-500 bg-opacity-50 flex items-center justify-center`}>
       <Card className="w-96">
         <CardContent className={classes.content}>
@@ -154,10 +138,10 @@ function Payment({ isOpen, onClose, plan_id, price_id, planName, price }) {
           </div>
           <CardInput />
           <div className={classes.div}>
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmitSub}>
-              Subscription
+            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmitSub} disabled={loading}>
+              {loading ? <CircularProgress size={24} /> : 'Subscription'}
             </Button>
-            <Button variant="contained" color="secondary" className={classes.button} onClick={onClose}>
+            <Button variant="contained" color="secondary" className={classes.button} onClick={onClose} disabled={loading}>
               Close
             </Button>
           </div>

@@ -73,7 +73,7 @@ const PlanWindow = ({ plan }) => {
       if (response.status === 200) {
         console.log('Upgrade request sent successfully');
         toast.success('Upgrade successfully', { autoClose: 3000 });
-        window.location.reload();
+        //window.location.reload();
       } else {
         console.error('Failed to send upgrade request');
         toast.error('Failed to send upgrade request', { autoClose: 3000 });
