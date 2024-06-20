@@ -22,6 +22,29 @@ def add_security_headers(response):
     response.headers['Server'] = 'VietnameseTextSummarizer_SERVER'
     return response
 
+
+@app.route('/remaining_days', methods=['GET'])
+@login_required
+@admin_required
+@require_origin
+@update_last_access
+def get_remaining_days():
+    user_email = request.args.get('email')
+    
+    # Fetch the user's subscription data from Supabase
+    response = supabase.table('subscriptions').select('expired_time').eq('user_email', user_email).eq('status','active').execute()
+    
+    if response.data:
+        end_date_str = response.data[0]['expired_time']
+        if end_date_str is None:
+            return jsonify({"remaining_days": "Unlimited"})
+        end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00'))
+        now = datetime.now(timezone.utc)
+        remaining_days = (end_date - now).days
+        return jsonify({"remaining_days": remaining_days})
+    else:
+        return jsonify({"error": "User not found"}), 404
+
 @app.route('/admin_ban_user', methods=['PUT'])
 @login_required
 @admin_required
@@ -614,14 +637,24 @@ def upgrade_plan():
         supabase.table('subscriptions').update({'status': 'none'}).eq('user_email', user).execute()
 
         supabase.table('user').update({"subscription": plan}).eq('email', user).execute()
-        supabase.table('subscriptions').insert({
-            'user_email': user,
-            'payment menthod': 'card',
-            'created_at': start_day.isoformat(),
-            'expired_time': end_day.isoformat(),
-            'type': plan,
-            'status': 'active'
-        }).execute()
+        if (plan == 0):
+            supabase.table('subscriptions').insert({
+                'user_email': user,
+                'payment menthod': 'card',
+                'created_at': start_day.isoformat(),
+                'expired_time': None,
+                'type': plan,
+                'status': 'active'
+            }).execute()
+        else:
+            supabase.table('subscriptions').insert({
+                'user_email': user,
+                'payment menthod': 'card',
+                'created_at': start_day.isoformat(),
+                'expired_time': end_day.isoformat(),
+                'type': plan,
+                'status': 'active'
+            }).execute()
 
         return jsonify({'message': 'Plan upgraded successfully'}), 200
     except Exception as e:
