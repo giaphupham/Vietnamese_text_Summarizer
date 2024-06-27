@@ -16,7 +16,7 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
   const [loading, setLoading] = useState(false);
   const [sentences, setSentences] = useState(0);
   const [words, setWords] = useState(0);
-  const [maxWords, setMaxWords] = useState(1500);
+
   const textAreaRef = useRef();
   const [loggedIn, setLoggedIn] = useState(false); // Check user login status
   const maxFreeSummaries = 3;
@@ -39,7 +39,7 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
 
   const countSentences = () => {
     // Split text into sentences based on period, exclamation mark, or question mark
-    const sentences = inputText.split(/[\w|\)][.?!](\s|$)/g);
+    const sentences = inputText.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|\!)\s/g);
     // Filter out empty strings (e.g., consecutive punctuation marks)
     const filteredSentences = sentences.filter(sentence => sentence.trim() !== '');
     return filteredSentences.length;
@@ -50,14 +50,31 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
     return words.filter(word => word.trim() !== '').length; // filter out empty strings
   };
 
+  
+  const useMaxWords = () => {
+    const [maxWords, setMaxWords] = useState(700);
+  
+    useEffect(() => {
+      const subscription = localStorage.getItem('subscription');
+      if (subscription === '0') {
+        setMaxWords(1500);
+      } else if (subscription === '1') {
+        setMaxWords(3000);
+      } else if (subscription === '2') {
+        setMaxWords(10000);
+      }
+    }, []); // Empty dependency array means this effect runs once on mount
+  
+    return maxWords;
+  };
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
   };
 
-  const isTextareaEmpty = () => {
-    return inputText.trim() === '';
-  };
+  // const isTextareaEmpty = () => {
+  //   return inputText.trim() === '';
+  // };
 
   useEffect(() => {
     // Fetch user login status from the backend or session
@@ -87,7 +104,6 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
         setOutputText(data['output-text']);
         setSentences(data['sentences']);
         setWords(data['words']);
-        setMaxWords(data['max-words']);
         setSummaryCount(prevCount => prevCount + 1);
         setScore(data['score']);
         if (data['message'] != ''){
@@ -136,10 +152,7 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
           onChange={handleInputChange}
         />
         <div className='flex justify-between'>
-          {isTextareaEmpty() ? (
-            <FileInput />
-          ) : (<p className='p-4'>{countWords()} words / {maxWords} words | {countSentences()} sentences</p>
-          )}
+            <p className='p-4'>{countWords()} words / {useMaxWords()} words | {countSentences()} sentences</p>
           <button
           className="bg-[#178733] hover:bg-[#0B6722] text-white font-bold py-2 px-4 rounded-full my-2 mx-6 w-40"
           onClick={handleSummarize}

@@ -31,29 +31,26 @@ function RegisterForm({onSubmit, load}) {
     onSubmit({ username, password, name });
 };
 
-const responseFacebook = async (res) => {
-
-  
-
-  await HttpClient.post(`${import.meta.env.REACT_APP_URL}/login_by_acc`, {      
-      email: res.email,
-      name: res.name,
-      withCredentials: true,
-  }).then(response => {
-    console.log('then' + response.data)
-    localStorage.setItem('email', res.email);
-    localStorage.setItem('role', response.data.role)
-    if (response.data.role === 'admin' || response.data.role === 's_admin') {
-      navigate({ pathname: '/Admin' })
-    } else {
-      navigate({ pathname: '/' })
-    }
-  }).catch(error => {
-    console.log('catch ' + error)
-    toast.error('Login failed! Check your email and password again', {autoClose: 3000});
+// const responseFacebook = async (res) => {
+//   await HttpClient.post(`${import.meta.env.REACT_APP_URL}/login_by_acc`, {      
+//       email: res.email,
+//       name: res.name,
+//       withCredentials: true,
+//   }).then(response => {
+//     console.log('then' + response.data)
+//     localStorage.setItem('email', res.email);
+//     localStorage.setItem('role', response.data.role)
+//     if (response.data.role === 'admin' || response.data.role === 's_admin') {
+//       navigate({ pathname: '/Admin' })
+//     } else {
+//       navigate({ pathname: '/' })
+//     }
+//   }).catch(error => {
+//     console.log('catch ' + error)
+//     toast.error('Login failed! Check your email and password again', {autoClose: 3000});
     
-  });
-};
+//   });
+// };
 
 const responseGoogle = async (response) => {
   const res = jwtDecode(response.credential);
@@ -90,14 +87,14 @@ const responseGoogle = async (response) => {
           >
                         <div className="flex flex-col mb-6 justify-center">
               <div className="mb-4">
-                <FacebookLogin
+                {/* <FacebookLogin
                   appId="414388071398115"
                   fields="name,email"
                   callback={responseFacebook}
                   autoLoad={false}
                   textButton="Continue with Facebook"
                   cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
-                />
+                /> */}
               </div>
               <div className="w-full">
                 <GoogleLogin

@@ -46,6 +46,7 @@ function LoginPage() {
       console.log(response.data)
       localStorage.setItem('email', username);
       localStorage.setItem('role', response.data.role)
+      localStorage.setItem('subscription', response.data.plan)
       if (response.data.role === 'admin' || response.data.role === 's_admin') {
         navigate({ pathname: '/Admin' })
       } else {
@@ -60,29 +61,29 @@ function LoginPage() {
 
   };
 
-  const responseFacebook = async (res) => {
+  // const responseFacebook = async (res) => {
 
-    setLoading(true);
-    console.log(res);
-    await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login_by_acc`, {      
-        email: res.email,
-        name: res.name,
-        withCredentials: true,
-    }).then(response => {
-      console.log('then' + response.data)
-      localStorage.setItem('email', res.email);
-      localStorage.setItem('role', response.data.role)
-      if (response.data.role === 'admin' || response.data.role === 's_admin') {
-        navigate({ pathname: '/Admin' })
-      } else {
-        navigate({ pathname: '/' })
-      }
-    }).catch(error => {
-      console.log('catch ' + error)
-      toast.error(error.response.data.error, {autoClose: 3000});
-      setLoading(false);
-    });
-  };
+  //   setLoading(true);
+  //   console.log(res);
+  //   await HttpClient.post(`${import.meta.env.VITE_REACT_APP_URL}/login_by_acc`, {      
+  //       email: res.email,
+  //       name: res.name,
+  //       withCredentials: true,
+  //   }).then(response => {
+  //     console.log('then' + response.data)
+  //     localStorage.setItem('email', res.email);
+  //     localStorage.setItem('role', response.data.role)
+  //     if (response.data.role === 'admin' || response.data.role === 's_admin') {
+  //       navigate({ pathname: '/Admin' })
+  //     } else {
+  //       navigate({ pathname: '/' })
+  //     }
+  //   }).catch(error => {
+  //     console.log('catch ' + error)
+  //     toast.error(error.response.data.error, {autoClose: 3000});
+  //     setLoading(false);
+  //   });
+  // };
 
   const responseGoogle = async (response) => {
     const res = jwtDecode(response.credential);
@@ -96,6 +97,7 @@ function LoginPage() {
       console.log('then' + response.data)
       localStorage.setItem('email', res.email);
       localStorage.setItem('role', response.data.role)
+      localStorage.setItem('subscription', response.data.plan)
       if (response.data.role === 'admin' || response.data.role === 's_admin') {
         navigate({ pathname: '/Admin' })
       } else {
@@ -138,7 +140,7 @@ function LoginPage() {
           >
             <div className="flex flex-col mb-6 justify-center">
               <div className="mb-4">
-                <FacebookLogin
+                {/* <FacebookLogin
                   appId={import.meta.env.VITE_FACEBOOK_ID}
                   callback={responseFacebook}
                   fields="name,email"
@@ -147,7 +149,7 @@ function LoginPage() {
                   cssClass="py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white w-full"
                   access_token={responseFacebook}
                   scope={['email']}
-                />
+                /> */}
               </div>
               <div className="w-full">
                 <GoogleLogin
