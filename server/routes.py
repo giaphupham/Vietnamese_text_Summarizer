@@ -196,7 +196,7 @@ def summerize():
         return jsonify({'error': 'Missing input text '}), 400
     
     if sentences> math.ceil(len(sent_tokenize(input_text))/2):
-        return jsonify({'error': 'Number of input sentences cannot be too large or equals 0.'}), 400
+        return jsonify({'error': 'Number of input sentences cannot be too large.'}), 400
     username = session.get('user')
 
     try:
@@ -306,7 +306,7 @@ def login():
                     session['subscription'] = subscription
 
                     if role == 'admin' or role == 's_admin':
-                        return jsonify({'user': username, "role":role})
+                        return jsonify({'user': username, "role":role, 'plan': subscription})
                     else:
                         return redirect(url_for('home'))
                 else:
@@ -681,7 +681,7 @@ def login_and_register_by_3rd_party():
         session['logged_in'] = True
         session['summary_count'] = 3
         if role == 'admin' or role == 's_admin':
-            return jsonify({'user': email, "role":role})
+            return jsonify({'user': email, "role":role, 'plan': subscription})
         else:
             return redirect(url_for('home'))
     else:
@@ -692,7 +692,7 @@ def login_and_register_by_3rd_party():
         session['summary_count'] = 3
         session['subscription'] = subscription
         if role == 'admin' or role == 's_admin':
-            return jsonify({'user': email, "role":role})
+            return jsonify({'user': email, "role":role, 'plan': subscription})
         else:
             return redirect(url_for('home'))
     
