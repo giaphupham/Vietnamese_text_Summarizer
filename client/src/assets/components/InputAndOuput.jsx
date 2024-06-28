@@ -16,7 +16,6 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
   const [loading, setLoading] = useState(false);
   const [sentences, setSentences] = useState(0);
   const [words, setWords] = useState(0);
-
   const textAreaRef = useRef();
   const [loggedIn, setLoggedIn] = useState(false); // Check user login status
   const maxFreeSummaries = 3;
@@ -46,14 +45,19 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
   };
 
   const countWords = () => {
+    const maxWords = useMaxWords();
     const words = inputText.split(/\s+/); // split by spaces
-    return words.filter(word => word.trim() !== '').length; // filter out empty strings
+    const wordsCount = words.filter(word => word.trim() !== '').length; // filter out empty strings
+    if (wordsCount > maxWords) {
+      toast.warn(`You have exceeded the maximum word limit of ${maxWords} words.`);
+    }
+
+    return wordsCount;
   };
 
   
   const useMaxWords = () => {
     const [maxWords, setMaxWords] = useState(700);
-  
     useEffect(() => {
       const subscription = localStorage.getItem('subscription');
       if (subscription === '0') {
@@ -161,7 +165,8 @@ const InputAndOutput = ({showFeedback, Close, numberSentences}) => {
             {loading ? (
             <div
             className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-            role="status">
+            role="status"
+            >
             </div>
             ) : (
               'Summarize'

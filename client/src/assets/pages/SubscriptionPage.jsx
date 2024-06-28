@@ -76,7 +76,7 @@ const SubscriptionPage = () => {
             id:0,
             name: 'Free',
             price: '$0',
-            pros: ['Free updates', '24/7 support'],
+            pros: ['24/7 support'],
             cons: ['Limited to 5 times summary per day', '1500 words per summary', 'No advanced features']
           }} />
 
@@ -85,8 +85,8 @@ const SubscriptionPage = () => {
             id:1,
             name: 'Pro',
             price: '$0.99',
-            pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features'],
-            cons: ['3000 words per summary', 'No unlimited users','20 times summary per day'],
+            pros: ['Unlimited access to all features', '24/7 support', 'Advanced features'],
+            cons: ['3000 words per summary','20 times summary per day'],
             price_id:'price_1PH4H2RtjuoXgTndyQUnP94v'
           }} />
 
@@ -95,7 +95,7 @@ const SubscriptionPage = () => {
             id:2,
             name: 'Premium',
             price: '$9.99',
-            pros: ['Unlimited access to all features', 'Free updates', '24/7 support', 'Advanced features'],
+            pros: ['Unlimited access to all features', '24/7 support', 'Advanced features'],
             cons: ['No cons'],
             price_id:'price_1PHGgsRtjuoXgTndlp1SRwHQ'
           }} />

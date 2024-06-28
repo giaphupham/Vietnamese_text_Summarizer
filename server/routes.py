@@ -181,7 +181,7 @@ def summerize():
             session['summary_count'] = 0
             session['last_summary_time'] = current_time
     if not session.get('logged_in', None) and session['summary_count'] >= MAX_FREE_SUMMARIES:
-        return jsonify({'error': 'Free summary limit reached. Please choose a plan and register.'}), 403
+        return jsonify({'error': 'Free summary limit reached. Please login or register.'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 5 and session['subscription'] == 0:
         return jsonify({'error': 'Free summary limit reached. Please upgrade to Pro or Premium plan'}), 403
     elif session.get('logged_in', True) and session['summary_count'] > 20 and session['subscription'] == 1:

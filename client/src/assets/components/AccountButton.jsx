@@ -28,6 +28,7 @@ const AccountButton = () => {
           // Redirect to login page after successful logout
           localStorage.removeItem('email');
           localStorage.removeItem('role');
+          localStorage.removeItem('subscription');
           navigate({ pathname: '/Login' })
         } else {
           // Handle logout failure

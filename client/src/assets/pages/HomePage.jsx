@@ -32,7 +32,7 @@ function HomePage() {
     <div>
           <NavBar isLogin={isLogin}/>
           <MainField />
-          <Ads />
+          {/* <Ads /> */}
           <Footer />
     </div>
 
