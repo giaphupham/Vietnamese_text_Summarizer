@@ -253,7 +253,8 @@ def summerize():
 @require_origin
 @update_last_access
 def home():
-    return jsonify({'message': 'At home: Logged in successfully'}), 200
+    sub = session.get('subscription')
+    return jsonify({'message': 'At home: Logged in successfully', 'plan':sub}), 200
 
 @app.route('/register', methods=['POST'])
 @require_origin
