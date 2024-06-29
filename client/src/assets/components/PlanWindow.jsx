@@ -18,6 +18,7 @@ const PlanWindow = ({ plan }) => {
   const [planName, setPlanName] = useState("");
   const [planPrice, setPlanPrice] = useState("");
   const [remainingDays, setRemainingDays] = useState(null);
+  const [notify, setNotify] = useState(false);
 
   const handleUpgrade = (e) => {
     e.preventDefault();
@@ -35,8 +36,14 @@ const PlanWindow = ({ plan }) => {
       });
 
       if (response.status === 200) {
+        if (response.data.remaining_days === -1) {
+          setRemainingDays(0);
+          setIsConfirmationModalOpen(true);
+        }
+        else {
         setRemainingDays(response.data.remaining_days);
         setIsConfirmationModalOpen(true);
+        }
       } else {
         console.error('Failed to fetch remaining days');
         toast.error('Failed to fetch remaining days', { autoClose: 3000 });
@@ -83,11 +90,25 @@ const PlanWindow = ({ plan }) => {
     }
   };
 
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const response = await HttpClient.get(`${import.meta.env.VITE_REACT_APP_URL}/check_subscription`);
+        setNotify(response.data.notify);
+        console.log(response.data.notify);
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    };
+
+    checkSubscription();
+  }, []);
+
   return (
     <Elements stripe={stripePromise}>
       <div className="p-6 border border-[#178733] rounded-lg shadow-lg bg-white my-4 md:mx-4 md:w-1/3 w-full">
         <h2 className="text-xl font-semibold text-center mb-2">{plan.name}</h2>
-        {plan.plans ? (
+        {(plan.plans && notify) ? (
           <button className="w-full my-2 bg-gray-500 text-white font-semibold py-2 px-4 rounded-full" disabled>Current Plan</button>
         ) : (
           <button className="w-full my-2 bg-[#178733] hover:bg-[#0B6722] text-white font-semibold py-2 px-4 rounded-full" onClick={handleUpgrade}>Subscribe</button>

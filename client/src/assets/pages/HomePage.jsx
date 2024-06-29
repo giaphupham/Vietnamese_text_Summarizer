@@ -5,7 +5,8 @@ import axios from "axios";
 import { useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
-import Ads from "../components/Ads";
+// import Ads from "../components/Ads";
+import Notification from "../components/Notification";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ function HomePage() {
   return (
     <div>
           <NavBar isLogin={isLogin}/>
+          <Notification />
           <MainField />
           {/* <Ads /> */}
           <Footer />

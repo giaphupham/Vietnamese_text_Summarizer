@@ -23,13 +23,37 @@ def add_security_headers(response):
     return response
 
 
+@app.route('/check_subscription', methods=['GET'])
+@login_required
+@admin_required
+@require_origin
+@update_last_access
+def check_subscription():
+    user_email = session.get('user')
+    if not user_email:
+        return jsonify({'notify': False, 'error': 'User not logged in'}), 401
+
+    today = datetime.today().date()
+    response = supabase.table('subscriptions').select('expired_time','type').eq('user_email', user_email).eq('status','active').execute()
+    print(response.data[0]['expired_time'])
+    if response.data[0]['expired_time'] != None:
+        end_date_str = response.data[0]['expired_time']
+        end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00')).date()
+        print(today, end_date)
+        if today == end_date:
+            return jsonify({'notify': False})
+    else:
+        return jsonify({'notify': True})
+    return jsonify({'notify': True})
+
+
 @app.route('/remaining_days', methods=['GET'])
 @login_required
 @admin_required
 @require_origin
 @update_last_access
 def get_remaining_days():
-    user_email = request.args.get('email')
+    user_email = session.get('user')
     
     # Fetch the user's subscription data from Supabase
     response = supabase.table('subscriptions').select('expired_time').eq('user_email', user_email).eq('status','active').execute()
