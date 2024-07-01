@@ -22,6 +22,21 @@ def add_security_headers(response):
     response.headers['Server'] = 'VietnameseTextSummarizer_SERVER'
     return response
 
+@app.route('/admin_get_feedback', methods=['GET'])
+@login_required
+@admin_required
+@require_origin
+@update_last_access
+def admin_get_feedback():
+    try:
+        feedbacks = (supabase
+                .table('feedback')
+                .select('id','star','comment','created_at','user')
+                .order('created_at', desc=True)
+                .execute())
+        return jsonify(feedbacks.data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/check_subscription', methods=['GET'])
 @login_required
@@ -449,7 +464,6 @@ def admin_get_users():
                 .table('user')
                 .select('id','email','name','role','subscription','created_at',"last_access", "banned")
                 .order('last_access', desc=True)
-                .limit(50)
                 .execute())
         return jsonify(users.data)
     except Exception as e:

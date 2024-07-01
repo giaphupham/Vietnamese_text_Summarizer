@@ -3,6 +3,7 @@ import Users from '../components/Users';
 import SalesReport from '../components/SaleReport';
 import ApproveAdmin from '../components/ApproveAdmin';
 import NavBar from '../components/NavBar';
+import FeedBacks from '../components/Feedbacks';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 
@@ -39,6 +40,12 @@ const AdminPage = () => {
           Users
         </button>
         <button
+        onClick={() => setActiveSection('feedback')}
+        className={`mr-4 border-b-2 border-white hover:border-green-700 ${activeSection === 'feedback' ? 'text-green-700 !border-green-700' : 'text-gray-500'}`}
+        >
+          FeedBack
+        </button>
+        <button
           onClick={() => setActiveSection('sales')}
           className={`mr-4 border-b-2 border-white hover:border-green-700 ${activeSection === 'sales' ? 'text-green-700 !border-green-700' : 'text-gray-500'}`}
         >
@@ -53,6 +60,7 @@ const AdminPage = () => {
       </nav>
       <div className=''>
         {activeSection === 'users' && <Users />}
+        {activeSection === 'feedback' && <FeedBacks />}
         {activeSection === 'sales' && <SalesReport />}
         {activeSection === 'approve' && <ApproveAdmin />}
       </div>
