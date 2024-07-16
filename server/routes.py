@@ -40,7 +40,6 @@ def admin_get_feedback():
 
 @app.route('/check_subscription', methods=['GET'])
 @login_required
-@admin_required
 @require_origin
 @update_last_access
 def check_subscription():
@@ -49,10 +48,12 @@ def check_subscription():
         return jsonify({'notify': False, 'error': 'User not logged in'}), 401
 
     today = datetime.today().date()
+
     response = supabase.table('subscriptions').select('expired_time','type').eq('user_email', user_email).eq('status','active').execute()
-    print(response.data[0]['expired_time'])
-    if response.data[0]['expired_time'] != None:
-        end_date_str = response.data[0]['expired_time']
+    print(response.data[0])
+    exp = response.data[0]['expired_time']
+    if exp != None:
+        end_date_str = exp
         end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00')).date()
         print(today, end_date)
         if today == end_date:
@@ -64,7 +65,6 @@ def check_subscription():
 
 @app.route('/remaining_days', methods=['GET'])
 @login_required
-@admin_required
 @require_origin
 @update_last_access
 def get_remaining_days():
@@ -305,10 +305,19 @@ def register():
     password = data.get('password')
     name = data.get('name')
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    print(username, password, hashed_password)
+    today = datetime.now(timezone.utc)
+    end_date = today + timedelta(days=3650)
     if username and password:
         try:
             supabase.table('user').insert({"email": username, "password": hashed_password, "name": name}).execute()
+            supabase.table('subscriptions').insert({
+                'user_email': username,
+                'payment menthod': 'card',
+                'created_at': today.isoformat(),
+                'expired_time': end_date.isoformat(),
+                'type': 0,
+                'status': 'active'
+            }).execute()
             return jsonify({'message': 'User created successfully'}), 200
         except Exception as e:
             return jsonify({'error': str(e), 'code': str(e.code)}), 500
