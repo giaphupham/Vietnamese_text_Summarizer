@@ -254,7 +254,9 @@ def summerize():
                 return jsonify({'error': 'Only user can summarize more than 700 words, please login'}), 403
 
         output_text = summarizer(input_text)
-        
+        output_sentences = len(sent_tokenize(output_text))
+    
+
         r, evaluate = load_model()
         
         session['summary_count'] += 1
@@ -272,7 +274,6 @@ def summerize():
         
         output_sentences_new = len(sent_tokenize(output_text_new))
         output_words = len(output_text_new.split())
-        output_sentences = len(sent_tokenize(output_text_new))
         score = evaluate.content_based(output_text_new, input_text)
         return jsonify({
             'message': msg_result,
